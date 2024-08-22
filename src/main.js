@@ -1,9 +1,10 @@
 import { Boot } from './scenes/Boot';
-import { Game } from './scenes/Game';
-import { GameOver } from './scenes/GameOver';
+import { Laurel } from './scenes/Laurel';
 import { MainMenu } from './scenes/MainMenu';
 import { Preloader } from './scenes/Preloader';
 import { Mining } from './scenes/Mining';
+import { Carving } from './scenes/Carving';
+import { Institute } from './scenes/Institute';
 
 //  Find out more information about the Game Config at:
 //  https://newdocs.phaser.io/docs/3.70.0/Phaser.Types.Core.GameConfig
@@ -22,7 +23,9 @@ const config = {
         Preloader,
         MainMenu,
         Mining,
-        GameOver
+        Carving,
+        Laurel,
+        Institute
     ]
 };
 

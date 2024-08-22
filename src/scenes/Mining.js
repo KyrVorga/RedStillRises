@@ -115,6 +115,9 @@ export class Mining extends Scene {
         const savedHelium = localStorage.getItem('helium');
         if (savedHelium !== null) {
             this.helium = parseFloat(savedHelium);
+            if (this.helium >= this.heliumTarget) {
+                this.NextScene();
+            };
         }
 
         const savedIsMiningSpeedUpgradeEnabled = localStorage.getItem('isMiningSpeedUpgradeEnabled');
@@ -163,6 +166,7 @@ export class Mining extends Scene {
     // Save progress to local storage
     saveProgress() {
         localStorage.setItem('helium', this.helium);
+        localStorage.setItem('currentScene', 'Mining');
 
         localStorage.setItem('isMiningSpeedUpgradeEnabled', this.isMiningSpeedUpgradeEnabled);
         localStorage.setItem('isHeliumStorageUpgradeEnabled', this.isHeliumStorageUpgradeEnabled);
@@ -209,7 +213,7 @@ export class Mining extends Scene {
                 this.UpdateHeliumText();
 
                 if (this.helium >= this.heliumTarget) {
-                    this.scene.start('WinScene');
+                    this.NextScene();
                 }
                 
                 if (this.helium >= this.miningSpeedCosts[1] && !this.isMiningSpeedUpgradeEnabled) {
@@ -713,5 +717,20 @@ export class Mining extends Scene {
 
     GetHeliumStorage() {
         return this.heliumStorageValues[this.heliumStorageLevel];
+    }
+    
+    NextScene() {
+        localStorage.removeItem('helium');
+        localStorage.removeItem('isMiningSpeedUpgradeEnabled');
+        localStorage.removeItem('isHeliumStorageUpgradeEnabled');
+        localStorage.removeItem('isMiningEfficiencyUpgradeEnabled');
+        localStorage.removeItem('isAddtionalMinerUpgradeEnabled');
+        localStorage.removeItem('miningSpeedLevel');
+        localStorage.removeItem('heliumStorageLevel');
+        localStorage.removeItem('miningEfficiencyLevel');
+        localStorage.removeItem('additionalMinerLevel');
+
+        localStorage.setItem('currentScene', 'Laurel');
+        this.scene.start('Laurel');
     }
 }

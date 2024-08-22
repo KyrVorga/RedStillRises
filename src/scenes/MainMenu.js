@@ -12,6 +12,9 @@ export class MainMenu extends Scene {
     }
 
     create() {
+        
+        const currentScene = localStorage.getItem('currentScene');
+
         // Ensure the font is loaded before rendering text
         WebFont.load({
             custom: {
@@ -29,7 +32,23 @@ export class MainMenu extends Scene {
                 }).setOrigin(0.5);
 
                 this.input.once('pointerdown', () => {
-                    this.scene.start('Mining');
+                    if (currentScene !== null) {
+                        switch (currentScene) {
+                            case 'Mining':
+                                this.scene.start('Mining');
+                                break;
+                            case 'Laurel':
+                                this.scene.start('Laurel');
+                                break;
+                            case 'Carving':
+                                this.scene.start('Carving');
+                                break;
+                            default:
+                                break;
+                        }
+                    } else {
+                        this.scene.start('Mining');
+                    }
                 });
             }
         });
