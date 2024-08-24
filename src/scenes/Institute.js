@@ -14,7 +14,10 @@ export class Institute extends Scene {
     }
 
     create() {
-        this.add.text(SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2, `Welcome ${this.name} to ${this.house}!`, {
+        // capatilize the first letter of the house
+        this.house = this.house.charAt(0).toUpperCase() + this.house.slice(1);
+
+        this.add.text(SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2, `Welcome ${this.name} to House ${this.house}!`, {
             fontFamily: 'Arial',
             fontSize: 24,
             color: '#ffffff',

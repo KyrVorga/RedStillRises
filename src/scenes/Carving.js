@@ -69,7 +69,7 @@ const questions = [
     },
     {
         id: 'q6',
-        text: 'A close friend asks for your help with a risky plan that could benefit both of you.',
+        text: 'A close friend asks for your help with a risky plan that you both could profit from.',
         options: [
             { text: 'Agree to the plan, trusting your friend and valuing the potential rewards.', values: { apollo: 3, jupiter: 2 } },
             { text: 'Assess the risks and benefits carefully before making a decision.', values: { minerva: 3, ceres: 2 } },
@@ -176,8 +176,8 @@ const questions = [
             { text: 'Lucian au Solis' },
             { text: 'Selene au Arcturus' },
             { text: 'Leona au Fenix' },
-            { text: 'Jespar au Pyxis' },
-
+            { text: 'Vesper au Pyxis' },
+            { text: 'Helena au Corvin'}
         ]
     }
 ];
@@ -191,6 +191,7 @@ export class Carving extends Scene
         this.currentDialogueIndex = 0;
         this.currentQuestionIndex = null;
         this.answers = {};
+        this.pointerdownListener = null;
     }
 
     preload() {
@@ -214,19 +215,20 @@ export class Carving extends Scene
         }
 
         this.dialogueText = this.add.text(SCREEN_WIDTH / 2, SCREEN_HEIGHT - 100, '', {
-            fontFamily: 'Arial',
+            fontFamily: "Pixelify Sans",
             fontSize: 24,
             color: '#ffffff',
-            align: 'center',
+            stroke: '#000000',
+            strokeThickness: 2,
             wordWrap: { width: SCREEN_WIDTH - 40 }
         }).setOrigin(0.5);
 
-        this.input.on('pointerdown', this.nextDialogue, this);
 
         this.loadIndices();
         if (this.currentQuestionIndex != null) {
             this.startQuestions();
         } else {
+            this.pointerdownListener = this.input.on('pointerdown', this.nextDialogue, this);
             this.showCurrentDialogue();
         }
     }
@@ -250,6 +252,10 @@ export class Carving extends Scene
     clearDialouge() {
         this.dialogueText.destroy();
         localStorage.removeItem('currentDialogueIndex');
+        
+        for (const key in this.characterImages) {
+            this.characterImages[key].destroy();
+        }
     }
 
     showCurrentDialogue() {
@@ -288,7 +294,35 @@ export class Carving extends Scene
     startQuestions() {
         this.clearDialouge();
         this.saveQuestionIndex();
-        this.showQuestion();
+        this.loadAnswers();
+    
+        // Clear any existing question text and option buttons
+        if (this.questionText) {
+            this.questionText.destroy();
+        }
+        if (this.optionButtons) {
+            this.optionButtons.forEach(button => button.destroy());
+        }
+    
+        this.questionText = this.add.text(SCREEN_WIDTH / 2, 100, 'Answer the following questions to determine your house:', {
+            fontFamily: "Pixelify Sans",
+            fontSize: 32,
+            color: '#ffffff',
+            stroke: '#000000',
+            strokeThickness: 2,
+            align: 'center',
+            wordWrap: { width: SCREEN_WIDTH - SCREEN_WIDTH / 3 }
+        }).setOrigin(0.5);
+        this.pointerdownListener = null;
+        this.optionButtons = [];
+        this.optionButtons.push(this.add.text(SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2, 'Click to start', {
+            fontFamily: "Pixelify Sans",
+            fontSize: 32,
+            color: '#ffffff',
+            stroke: '#000000',
+            strokeThickness: 2,
+            align: 'center',
+        }).setOrigin(0.5).setInteractive().on('pointerdown', this.showQuestion, this));
     }
 
     saveQuestionIndex() {
@@ -299,36 +333,90 @@ export class Carving extends Scene
         localStorage.setItem('answers', JSON.stringify(this.answers));
     }
 
+    loadAnswers() {
+        const savedAnswers = localStorage.getItem('answers');
+        if (savedAnswers !== null) {
+            this.answers = JSON.parse(savedAnswers);
+        }
+    }
+
     showQuestion() {
         if (this.currentQuestionIndex == null) {
             this.currentQuestionIndex = 0;
-        }
-        else if (this.currentQuestionIndex >= questions.length) {
+        } else if (this.currentQuestionIndex >= questions.length) {
             this.finishQuestions();
             return;
         }
-
+    
         const question = questions[this.currentQuestionIndex];
-        this.dialogueText.setText(question.text);
-
+        this.questionText.setText(question.text);
+    
         // Clear previous options
         if (this.optionButtons) {
             this.optionButtons.forEach(button => button.destroy());
         }
-
+    
+        let currentY = SCREEN_HEIGHT / 3;
+        let previousHeight = 0; // Variable to store the height of the previous option
+    
         this.optionButtons = question.options.map((option, index) => {
-            return this.add.text(SCREEN_WIDTH / 2, SCREEN_HEIGHT - 200 + index * 40, option.text, {
-                fontFamily: 'Arial',
-                fontSize: 24,
+            const optionText = this.add.text(SCREEN_WIDTH / 2, currentY, option.text, {
+                fontFamily: "Pixelify Sans",
+                fontSize: 32,
                 color: '#ffffff',
-                align: 'center'
+                stroke: '#000000',
+                strokeThickness: 2,
+                align: 'center',
+                wordWrap: { width: SCREEN_WIDTH - SCREEN_WIDTH / 3 }
             }).setOrigin(0.5).setInteractive().on('pointerdown', () => {
-                this.answers[question.id] = option.value;
+                if (question.id === 'name') {
+                    this.answers[question.id] = option.text;
+                } else {
+                    this.answers[question.id] = option.values;
+                }
                 this.saveAnswers();
                 this.currentQuestionIndex++;
                 this.saveQuestionIndex();
                 this.showQuestion();
             });
+        
+            // Calculate the height of the optionText
+            const bounds = optionText.getBounds();
+            const currentHeight = Math.round(bounds.height); // Round to the nearest whole number
+        
+            // Check the height of the next element if it exists
+            let nextHeight = 0;
+            if (index < question.options.length - 1) {
+                const nextOptionText = this.add.text(SCREEN_WIDTH / 2, currentY, question.options[index + 1].text, {
+                    fontFamily: "Pixelify Sans",
+                    fontSize: 32,
+                    color: '#ffffff',
+                    stroke: '#000000',
+                    strokeThickness: 2,
+                    align: 'center',
+                    wordWrap: { width: SCREEN_WIDTH - SCREEN_WIDTH / 3 }
+                }).setOrigin(0.5);
+                nextHeight = Math.round(nextOptionText.getBounds().height); // Round to the nearest whole number
+                nextOptionText.destroy(); // Destroy the temporary text object
+            }
+        
+            console.log('previousHeight:', previousHeight);
+            console.log('currentHeight:', currentHeight);
+            console.log('nextHeight:', nextHeight);
+        
+            // Adjust padding based on the height of the current and next elements
+            if (previousHeight > currentHeight && nextHeight > currentHeight) {
+                currentY += previousHeight + 20; // Add 20 to the padding
+            } else if (previousHeight > currentHeight && nextHeight <= currentHeight) {
+                currentY += previousHeight;
+            } else {
+                currentY += currentHeight + 20; // Use the current height for padding
+            }
+        
+            // Update previousHeight to the current height
+            previousHeight = currentHeight;
+        
+            return optionText;
         });
     }
 
