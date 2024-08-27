@@ -7,13 +7,15 @@ export class MapManager {
         this.tileSize = tileSize;
         this.margin = margin;
         this.fogTiles = [];
-        this.hexWidth = this.tileSize;
-        this.hexHeight = Math.sqrt(3) / 2 * this.hexWidth;
         this.scaleFactor = 1;
+        this.zoomFactor = 1; // Add zoom factor
         this.tileSprites = []; // Store references to tile sprites
+        this.tileIcons = []; // Store references to tile icons
 
+        this.calculateHexSize();
         this.renderMap();
     }
+
 
     renderMap() {
         this.mapData.forEach((tile) => {
@@ -21,22 +23,36 @@ export class MapManager {
             const x = this.hexWidth * (3/4 * q);
             const y = this.hexHeight * (r + q / 2);
             const tileSprite = this.scene.add.image(x, y, biome);
-            tileSprite.setScale(this.scaleFactor);
-            this.tileSprites.push(tileSprite); // Store reference to tile sprite
+            // tileSprite.setScale(this.scaleFactor * this.zoomFactor); // Adjust scale based on zoom factor
+            this.tileSprites.push(tileSprite);
+
+            // display the tiles icon
+            if (tile.icon) {
+                const icon = this.scene.add.image(x, y, tile.icon);
+                // icon.setScale(this.scaleFactor * this.zoomFactor); // Adjust scale based on zoom factor
+                if (!tile.isOutpost && !tile.isCastle) {
+                    icon.setAlpha(0.5);
+                }
+                this.tileIcons.push(icon);
+            }
 
             if (!tile.revealed) {
                 const fogTile = this.scene.add.image(x, y, 'fog');
-                fogTile.setScale(this.scaleFactor);
+                // fogTile.setScale(this.scaleFactor * this.zoomFactor); // Adjust scale based on zoom factor
                 this.fogTiles.push({ q: tile.q, r: tile.r, sprite: fogTile });
             }
         });
     }
 
     rerenderMap() {
+        console.log(this.tileSize);
         this.tileSprites.forEach(sprite => sprite.destroy());
         this.fogTiles.forEach(fogTile => fogTile.sprite.destroy());
+        this.tileIcons.forEach(icon => icon.destroy());
         this.tileSprites = [];
         this.fogTiles = [];
+        this.tileIcons = [];
+        this.calculateHexSize();
         this.renderMap();
     }
 
@@ -54,6 +70,11 @@ export class MapManager {
         }
     }
 
+    calculateHexSize() {
+        this.hexWidth = this.tileSize;
+        this.hexHeight = Math.sqrt(3) / 2 * this.hexWidth;
+        console.log(this.hexWidth, this.hexHeight);
+    }
 
     revealTile(q, r) {
         const fogTile = this.fogTiles.find(tile => tile.q === q && tile.r === r);
@@ -75,5 +96,16 @@ export class MapManager {
             tile.revealed = true;
         });
         this.rerenderMap();
+    }
+
+    setZoomFactor(zoomFactor) {
+        this.zoomFactor = zoomFactor;
+        this.rerenderMap();
+    }
+
+    setTileSize(tileSize) {
+        this.tileSize = tileSize;
+        console.log(this.tileSize);
+        this.calculateHexSize();
     }
 }
