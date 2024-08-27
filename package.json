@@ -24,6 +24,7 @@
     },
     "dependencies": {
         "phaser": "^3.80.1",
+        "simplex-noise": "^4.0.3",
         "webfontloader": "^1.6.28"
     }
 }

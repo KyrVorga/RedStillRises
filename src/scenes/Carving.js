@@ -195,7 +195,6 @@ export class Carving extends Scene
     }
 
     preload() {
-        this.load.image('background', 'assets/bg.png');
         for (const key in characters) {
             const char = characters[key];
             this.load.image(`${char.folder}_happy`, `assets/${char.folder}/happy.png`);
@@ -206,7 +205,7 @@ export class Carving extends Scene
 
     create() {
         this.cameras.main.setBackgroundColor(0x000000);
-        this.add.image(SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2, 'background').setAlpha(0.5);
+        this.add.image(SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2, 'city').setAlpha(0.5);
 
         this.characterImages = {};
         for (const key in characters) {

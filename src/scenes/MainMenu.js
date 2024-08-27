@@ -22,7 +22,7 @@ export class MainMenu extends Scene {
                 urls: ['/style.css'] // Update this path to your actual font CSS file
             },
             active: () => {
-                this.add.image(512, 384, 'background');
+                this.add.image(512, 384, 'mining');
                 this.add.image(512, 380, 'logo');
 
                 this.add.text(512, 460, 'Play', {

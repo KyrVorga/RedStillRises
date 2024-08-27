@@ -1,7 +1,8 @@
 import { Scene } from 'phaser';
-
-const SCREEN_WIDTH = 1024;
-const SCREEN_HEIGHT = 768;
+import { MapGenerator } from '../institute/MapGenerator';
+import { OverlayManager } from '../institute/OverlayManager';
+import { CameraController } from '../institute/CameraController';
+import { MapManager } from '../institute/MapManager';
 
 export class Institute extends Scene {
     constructor() {
@@ -11,159 +12,56 @@ export class Institute extends Scene {
     init(data) {
         this.house = data.house;
         this.name = data.name;
-        this.tileSize = 64;       // Size of each tile
-        this.gridSize = 3;      // 100x100 grid
-        this.margin = 100;         // this.margin around the grid
+        this.tileSize = 64;
+        this.sideLength = 10;
+        this.margin = 100;
 
-        this.canvasHeight = 1000;
-        this.canvasWidth = 1000;
-        
-        this.mapData = this.generateMapData(this.gridSize);
-        this.fogTiles = [];
+        this.mapGenerator = new MapGenerator(this.tileSize, this.sideLength);
+        this.mapData = this.mapGenerator.generateMapData();
     }
 
     preload() {
-        // Optional: Load a background image
-        this.load.image('background', 'path/to/background.png');
-        
-        // Load hexagonal tile images
-        this.load.svg('hex', 'assets/tiles/Grassland.svg', { width: this.tileSize, height: this.tileSize });
+        this.load.svg('grassland', 'assets/tiles/Grassland.svg', { width: this.tileSize, height: this.tileSize });
         this.load.svg('fog', 'assets/tiles/Fog.svg', { width: this.tileSize, height: this.tileSize });
-
+        this.load.svg('mountain', 'assets/tiles/Mountain.svg', { width: this.tileSize, height: this.tileSize });
+        this.load.svg('hill', 'assets/tiles/Hill.svg', { width: this.tileSize, height: this.tileSize });
+        this.load.svg('forest', 'assets/tiles/Forest.svg', { width: this.tileSize, height: this.tileSize });
+        this.load.svg('greatwood', 'assets/tiles/Greatwood.svg', { width: this.tileSize, height: this.tileSize });
+        this.load.svg('farmland', 'assets/tiles/Farmland.svg', { width: this.tileSize, height: this.tileSize });
+        this.load.svg('desert', 'assets/tiles/Desert.svg', { width: this.tileSize, height: this.tileSize });
+        this.load.svg('swamp', 'assets/tiles/Swamp.svg', { width: this.tileSize, height: this.tileSize });
+        this.load.svg('tundra', 'assets/tiles/Tundra.svg', { width: this.tileSize, height: this.tileSize });
+        this.load.svg('castle', 'assets/tiles/Castle.svg', { width: this.tileSize, height: this.tileSize });
+        this.load.svg('shallow', 'assets/tiles/Shallow.svg', { width: this.tileSize, height: this.tileSize });
+        this.load.svg('deep', 'assets/tiles/Deep.svg', { width: this.tileSize, height: this.tileSize });
     }
-    
+
     create() {
-        console.log("canvas:", this.canvasWidth, this.canvasHeight);
-    
-        const viewportWidth = this.cameras.main.width;
-        const viewportHeight = this.cameras.main.height;
-        console.log("viewport:", viewportWidth, viewportHeight);
-    
-        const gridWidth = this.gridSize * this.tileSize;
-        const gridHeight = this.gridSize * this.tileSize;
-        console.log("grid:", gridWidth, gridHeight);
-    
-        let startX = -(gridWidth / 2) - (this.tileSize / 2);
-        let startY = -(gridHeight / 2)- (this.tileSize / 2);
-        console.log("start:", startX, startY);
-        
-        // Create the grid of hexagonal tiles
+        this.cameras.main.setBackgroundColor(0x000000);
+
         const hexWidth = this.tileSize;
-        const hexHeight = Math.sqrt(3) / 2 * hexWidth; // Height of a flat-top hexagon
-        const scaleFactor = 1; // Adjust scale as needed
+        const hexHeight = Math.sqrt(3) / 2 * hexWidth;
 
-        // Center tile at (0, 0)
-        const centerX = 64 * 8;
-        const centerY = 64 * 6;
-        console.log("center:", centerX, centerY);
+        const centerTile = this.mapData.find(tile => tile.q === 0 && tile.r === 0);
+        const centerX = hexWidth * (3/4 * centerTile.q);
+        const centerY = hexHeight * (centerTile.r + centerTile.q / 2);
 
-
-        // Lay out the map tiles
-        this.mapData.forEach((row, rowIndex) => {
-            row.forEach((tile, colIndex) => {
-                const posX = startX + colIndex * hexWidth * 0.75;
-                const posY = startY + rowIndex * hexHeight + (colIndex % 2 === 0 ? 0 : hexHeight / 2);
-                const tileSprite = this.add.image(posX, posY, 'hex');
-                tileSprite.setScale(scaleFactor);
-
-                // Add fog tile on top of non-center tiles
-                if (!(rowIndex === 1 && colIndex === 1)) {
-                    const fogTile = this.add.image(posX, posY, 'fog');
-                    fogTile.setScale(scaleFactor);
-                    this.fogTiles.push({ x: colIndex, y: rowIndex, sprite: fogTile });
-                }
-            });
-        });
+        this.cameraController = new CameraController(this);
+        this.cameraController.initializeCamera(centerX, centerY, 1);
+        this.cameraController.enablePanning();
 
 
-        // Create an overlay with a hole
-        this.overlay = this.add.graphics();
-        this.overlay.fillStyle(0x333333, 1);
+        // Add background image and set it to follow the camera
+        const background = this.add.image(0, 0, 'institute').setAlpha(0.5);
+        background.setOrigin(0, 0);
+        background.setScrollFactor(0); 
+        background.setDepth(-1); 
+        background.setScale(0.75);
 
-        // Create the top rectangle
-        this.overlay.fillRect(0, 0, viewportWidth, this.margin);
-        
-        // Create the bottom rectangle
-        this.overlay.fillRect(0, viewportHeight - this.margin, viewportWidth, this.margin);
-        
-        // Create the left rectangle
-        this.overlay.fillRect(0, this.margin, this.margin, viewportHeight - 2 * this.margin);
-        
-        // Create the right rectangle
-        this.overlay.fillRect(viewportWidth - this.margin, this.margin, this.margin, viewportHeight - 2 * this.margin);
-        this.overlay.setScrollFactor(0);
+        this.mapManager = new MapManager(this, this.mapData, this.tileSize, this.margin);
+        this.mapManager.revealAllTiles();
 
-        // Initialize panning variables
-        let isPanning = false;
-        let panStartX = 0;
-        let panStartY = 0;
-
-        // Add event listener for mouse down (start panning)
-        this.input.on('pointerdown', (pointer) => {
-            if (pointer.middleButtonDown()) {
-                isPanning = true;
-                panStartX = pointer.x;
-                panStartY = pointer.y;
-            }
-        });
-
-        // Add event listener for mouse up (stop panning)
-        this.input.on('pointerup', (pointer) => {
-            if (pointer.middleButtonReleased()) {
-                isPanning = false;
-            }
-        });
-
-        // Add event listener for mouse move (handle panning)
-        this.input.on('pointermove', (pointer) => {
-            if (isPanning) {
-                const deltaX = panStartX - pointer.x;
-                const deltaY = panStartY - pointer.y;
-
-                // Pan the camera
-                this.cameras.main.scrollX += deltaX;
-                this.cameras.main.scrollY += deltaY;
-
-                // Update the start position for the next move
-                panStartX = pointer.x;
-                panStartY = pointer.y;
-            }
-        });
-    }
-
-    generateMapData(size) {
-        const mapData = [];
-        for (let i = 0; i < size; i++) {
-            const row = [];
-            for (let j = 0; j < size; j++) {
-                row.push({ type: 'grassland' }); // Example tile type
-            }
-            mapData.push(row);
-        }
-        return mapData;
-    }
-
-    getAdjacentTiles(x, y) {
-        const directions = [
-            { dx: 1, dy: 0 }, { dx: -1, dy: 0 },
-            { dx: 0, dy: 1 }, { dx: 0, dy: -1 },
-            { dx: 1, dy: -1 }, { dx: -1, dy: 1 }
-        ];
-        return directions.map(dir => ({ x: x + dir.dx, y: y + dir.dy }));
-    }
-
-    revealTile(x, y) {
-        const fogTile = this.fogTiles.find(tile => tile.x === x && tile.y === y);
-        if (fogTile) {
-            fogTile.sprite.destroy();
-            this.fogTiles = this.fogTiles.filter(tile => tile !== fogTile);
-        }
-    }
-
-    revealAdjacentTiles(x, y) {
-        const adjacentTiles = this.getAdjacentTiles(x, y);
-        adjacentTiles.forEach(tile => {
-            this.revealTile(tile.x, tile.y);
-        });
+        this.overlayManager = new OverlayManager(this, this.margin);
+        this.overlay = this.overlayManager.createOverlay();
     }
 }

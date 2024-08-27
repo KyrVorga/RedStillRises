@@ -53,7 +53,7 @@ export class Mining extends Scene {
         
         this.cameras.main.setBackgroundColor(0x000000);
 
-        this.add.image(512, 384, 'background').setAlpha(0.5);
+        this.add.image(512, 384, 'mining').setAlpha(0.5);
 
         // Load saved progress from local storage
         this.loadProgress();
