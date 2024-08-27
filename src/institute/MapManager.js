@@ -17,10 +17,10 @@ export class MapManager {
 
     renderMap() {
         this.mapData.forEach((tile) => {
-            const { q, r } = tile;
+            const { q, r, biome } = tile;
             const x = this.hexWidth * (3/4 * q);
             const y = this.hexHeight * (r + q / 2);
-            const tileSprite = this.scene.add.image(x, y, 'grassland');
+            const tileSprite = this.scene.add.image(x, y, biome);
             tileSprite.setScale(this.scaleFactor);
             this.tileSprites.push(tileSprite); // Store reference to tile sprite
 

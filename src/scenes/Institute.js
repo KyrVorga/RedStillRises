@@ -13,7 +13,7 @@ export class Institute extends Scene {
         this.house = data.house;
         this.name = data.name;
         this.tileSize = 64;
-        this.sideLength = 10;
+        this.sideLength = 30;
         this.margin = 100;
 
         this.mapGenerator = new MapGenerator(this.tileSize, this.sideLength);

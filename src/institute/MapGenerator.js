@@ -6,6 +6,9 @@ export class MapGenerator {
         this.tileSize = tileSize;
         this.sideLength = sideLength;
         this.noise = new createNoise2D();
+        this.secondaryNoise = new createNoise2D();
+        this.frequency = 0.05; 
+        this.flatBiomeFrequency = 0.1;
     }
 
     generateMapData() {
@@ -14,9 +17,14 @@ export class MapGenerator {
             const startR = Math.max(-this.sideLength + 1, -q - this.sideLength + 1);
             const endR = Math.min(this.sideLength - 1, -q + this.sideLength - 1);
             for (let r = startR; r <= endR; r++) {
-                const noiseValue = this.noise(q / 10, r / 10);
-                const adjacentBiomes = this.getAdjacentBiomes(mapData, q, r);
-                const biome = Tile.determineBiome(noiseValue, adjacentBiomes);
+                const noiseValue = this.noise(q * this.frequency, r * this.frequency);
+                let biome = Tile.determineBiome(noiseValue);
+
+                if (biome === 'grassland') {
+                    const flatNoiseValue = this.secondaryNoise(q * this.flatBiomeFrequency, r * this.flatBiomeFrequency);
+                    biome = Tile.determineFlatBiome(flatNoiseValue);
+                }
+
                 mapData.push(new Tile(q, r, biome));
             }
         }
