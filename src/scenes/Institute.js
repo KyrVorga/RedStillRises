@@ -4,6 +4,9 @@ import { OverlayManager } from '../institute/OverlayManager';
 import { CameraController } from '../institute/CameraController';
 import { MapManager } from '../institute/MapManager';
 import { Tooltip } from '../institute/Tooltip';
+import { PlayerManager } from '../institute/PlayerManager';
+import { AIManager } from '../institute/AIManager';
+import { TurnManager } from '../institute/TurnManager';
 
 export class Institute extends Scene {
     constructor() {
@@ -133,8 +136,14 @@ export class Institute extends Scene {
         background.setDepth(-1); 
         background.setScale(0.75);
 
-        this.mapManager = new MapManager(this, this.mapData, this.tileSize, this.margin);
+        this.mapManager = new MapManager(this, this.mapData, this.tileSize);
         const playerHouse = this.mapManager.revealPlayerHouseTile(this.house);
+
+        this.playerManager = new PlayerManager(this, this.mapManager, playerHouse);
+        this.mapManager.setPlayerManager(this.playerManager);
+        
+        this.aiManager = new AIManager()//this, this.mapManager, this.house);
+        this.turnManager = new TurnManager(this, this.playerManager, this.aiManager);
 
         this.cameraController = new CameraController(this);
         this.cameraController.initializeCamera(playerHouse.x, playerHouse.y, 1);
@@ -193,5 +202,9 @@ export class Institute extends Scene {
         // });
         // this.overlayManager = new OverlayManager(this, this.margin);
         // this.overlay = this.overlayManager.createOverlay();
+
+
+
+        this.turnManager.startGame();
     }
 }

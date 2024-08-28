@@ -1,26 +1,24 @@
 import { Scene } from 'phaser';
 
 export class MapManager {
-    constructor(scene, mapData, tileSize, margin) {
+    constructor(scene, mapData, tileSize) {
+        this.playerManager;
         this.scene = scene;
         this.mapData = mapData;
         this.tileSize = tileSize;
-        this.margin = margin;
         this.fogTiles = [];
         this.scaleFactor = 1;
         this.zoomFactor = 1; // Add zoom factor
         this.tileSprites = []; // Store references to tile sprites
         this.tileIcons = []; // Store references to tile icons
         this.tileBorders = []; // Store references to tile borders
-        this.selectedTile = null; // Track the selected tile
-
-        // Add keyboard manager
-        this.cursors = this.scene.input.keyboard.createCursorKeys();
-        this.ctrlKey = this.scene.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.CTRL);
-        this.altKey = this.scene.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.ALT);
 
         this.calculateHexSize();
         this.renderMap();
+    }
+
+    setPlayerManager(playerManager) {
+        this.playerManager = playerManager;
     }
 
     renderMap() {
@@ -38,7 +36,7 @@ export class MapManager {
                 y = tile.y;
             }
 
-            if (tile.owner) {
+            if (tile.house) {
                 const hexBorder = this.scene.add.image(x, y, tile.border);
                 this.tileBorders.push(hexBorder);
             } else {
@@ -51,7 +49,7 @@ export class MapManager {
 
             // Make the tile clickable
             tileSprite.setInteractive();
-            tileSprite.on('pointerdown', (pointer) => this.handleMapClick(pointer, tile));
+            tileSprite.on('pointerdown', (pointer) => this.playerManager.handleMapClick(pointer, tile));
 
             // display the tiles icon
             if (tile.icon) {
@@ -79,7 +77,6 @@ export class MapManager {
     }
 
     rerenderMap() {
-        console.log(this.tileSize);
         this.tileSprites.forEach(sprite => sprite.destroy());
         this.fogTiles.forEach(fogTile => fogTile.sprite.destroy());
         this.tileIcons.forEach(icon => icon.destroy());
@@ -89,89 +86,98 @@ export class MapManager {
         this.calculateHexSize();
         this.renderMap();
     }
-
-
-    handleMapClick(pointer, clickedTile) {
-        const worldPoint = pointer.positionToCamera(this.scene.cameras.main);
-
-        console.log(pointer.ctrlKey)
-        if (pointer.leftButtonDown()) {
-            // Left-click: Select the clicked tile and show details in the info panel
-            this.selectedTile = clickedTile;
-            console.log('Tile selected:', clickedTile);
-            // Placeholder for showing details in the info panel
-            this.showTileDetails(clickedTile);
-        } else if (pointer.rightButtonDown()) {
-            // Right-click: Move units to the clicked tile
-            if (!this.selectedTile) {
-                console.log('No tile selected to move units from');
-                return;
-            }
-
-            // Check if the selected tile is owned by the player's house
-            if (!this.isOwnedByPlayer(this.selectedTile)) {
-                console.log('Selected tile is not owned by the player');
-                return;
-            }
-
-            // Check if the clicked tile is adjacent to the selected tile
-            if (!this.isAdjacent(this.selectedTile, clickedTile)) {
-                console.log('Clicked tile is not adjacent to the selected tile');
-                return;
-            }
-
-            // Check if the tile is not a water tile
-            if (clickedTile.biome === 'deep' || clickedTile.biome === 'shallow') {
-                console.log('Cannot move units to water tiles');
-                return;
-            }
-
-            // Placeholder for checking if the user can perform this action on their turn given their action points
-            if (!this.canPerformAction()) {
-                console.log('Not enough action points');
-                return;
-            }
-
-            let willReveal;
-            if (clickedTile.owner !== this.selectedTile.owner && clickedTile.units == 0) {
-                clickedTile.owner = this.selectedTile.owner;
-                clickedTile.border = this.selectedTile.border;
-
-                willReveal = true;
-            }
-
-            if (this.ctrlKey.isDown) {
-                // Move one unit to the clicked tile
-                this.transferUnits(this.selectedTile, clickedTile, 1);
-            } else if (this.altKey.isDown) {
-                // Move half the units to the clicked tile
-                const unitsToMove = Math.floor(this.selectedTile.units / 2);
-                this.transferUnits(this.selectedTile, clickedTile, unitsToMove);
-            } else {
-                // Move all units to the clicked tile and update the border
-                this.transferUnits(this.selectedTile, clickedTile, this.selectedTile.units);
-            }
-
-
-            if (this.selectedTile.units == 0) {
-                this.selectedTile = clickedTile;
-            }
-            
-            if (willReveal) {
-                this.revealAdjacentTiles(clickedTile.q, clickedTile.r);
-            } 
-            this.rerenderMap();
-            
+    
+    checkActionValidity(house, source, dest) {
+        if (!source) {
+            console.log('No source tile selected');
+            return false;
         }
+
+        if (!dest) {
+            console.log('No destination tile selected');
+            return false;
+        }
+
+        if (!this.isOwnedByHouse(source, house)) {
+            console.log('Selected tile is not owned by the player');
+            return false;
+        }
+        
+        if (source.units < 1) {
+            console.log('No units to move');
+            return;
+        }
+        if (source === dest) {
+            console.log('Cannot move units to the same tile');
+            return;
+        }
+
+        if (!this.isAdjacent(source, dest)) {
+            console.log('Clicked tile is not adjacent to the selected tile');
+            return false;
+        }
+
+        if (dest.biome === 'deep' || dest.biome === 'shallow') {
+            console.log('Cannot move units to water tiles');
+            return false;
+        }
+
+        return true;
     }
 
-    transferUnits(fromTile, toTile, units) {
-        if (fromTile.units < units) {
-            units = fromTile.units;
+    transferUnits(source, dest, units) {
+        // clamp units to the maximum available
+        if (source.units < units) {
+            units = source.units;
         }
-        fromTile.units -= units;
-        toTile.units += units;
-        console.log(`Transferred ${units} units from`, fromTile, 'to', toTile);
+        source.units -= units;
+        dest.units += units;
+
+        console.log(`Transferred ${units} units from`, source, 'to', dest);
+
+        if (source.units == 0) {
+            return dest;
+        }
+        return source;
+    }
+
+    moveOneUnit(house, source, dest) {
+        if (!this.checkActionValidity(house, source, dest)) return;
+        this.handleTileReveal(source, dest);
+        let tile = this.transferUnits(source, dest, 1);
+        this.rerenderMap();
+        
+        return tile;
+    }
+
+    moveHalfUnits(house, source, dest) {
+        if (!this.checkActionValidity(house, source, dest)) return;
+        const unitsToMove = Math.floor(source.units / 2);
+        this.handleTileReveal(source, dest);
+        let tile = this.transferUnits(source, dest, unitsToMove);
+        this.rerenderMap();
+        
+        return tile;
+    }
+
+    moveAllUnits(house, source, dest) {
+        if (!this.checkActionValidity(house, source, dest)) return;
+        this.handleTileReveal(source, dest);
+        let tile = this.transferUnits(source, dest, source.units);
+        this.rerenderMap();
+        
+        return tile;
+    }
+
+    handleTileReveal(source, dest) {
+        if (dest.house !== source.house && dest.units == 0) {
+            dest.house = source.house;
+            dest.border = source.border;
+            this.revealAdjacentTiles(dest.q, dest.r);
+
+            return true;
+        }
+        return false;
     }
 
     showTileDetails(tile) {
@@ -184,10 +190,9 @@ export class MapManager {
         return true;
     }
 
-    isOwnedByPlayer(tile) {
-        // Placeholder for checking if the tile is owned by the player's house
-        // Replace 'playerHouse' with the actual player's house identifier
-        return tile.owner === 'diana';
+    isOwnedByHouse(tile, house) {
+        console.log(tile.house, house);
+        return tile.house === house;
     }
 
     isAdjacent(tile1, tile2) {
@@ -211,6 +216,7 @@ export class MapManager {
     revealTile(q, r) {
         const fogTile = this.fogTiles.find(tile => tile.q === q && tile.r === r);
         const tile = this.mapData.find(tile => tile.q === q && tile.r === r);
+        if (!tile) return;
         tile.revealed = true;
         if (fogTile) {
             fogTile.sprite.destroy();
@@ -229,6 +235,7 @@ export class MapManager {
 
     revealAdjacentTiles(q, r) {
         const adjacentTiles = this.getAdjacentTiles(q, r);
+        console.log('Revealing adjacent tiles:', adjacentTiles);
         adjacentTiles.forEach(tile => {
             this.revealTile(tile.q, tile.r);
         });
@@ -247,4 +254,5 @@ export class MapManager {
         this.revealAdjacentTiles(playerHouse.q, playerHouse.r);
         return playerHouse;
     }
+
 }

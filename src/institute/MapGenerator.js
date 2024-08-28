@@ -163,11 +163,10 @@ export class MapGenerator {
             const border = houses[houseKey].border;
             const tile = castleLocations[i];
             tile.biome = 'castle';
-            tile.house = house;
             tile.icon = house;
             tile.units = 50;
             tile.isCastle = true;
-            tile.owner = house;
+            tile.house = house;
             tile.border = border;
         }
     }
