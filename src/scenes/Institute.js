@@ -7,6 +7,7 @@ import { Tooltip } from '../institute/Tooltip';
 import { PlayerManager } from '../institute/PlayerManager';
 import { AIManager } from '../institute/AIManager';
 import { TurnManager } from '../institute/TurnManager';
+import { House } from '../institute/House';
 
 export class Institute extends Scene {
     constructor() {
@@ -142,7 +143,8 @@ export class Institute extends Scene {
         this.playerManager = new PlayerManager(this, this.mapManager, playerHouse);
         this.mapManager.setPlayerManager(this.playerManager);
         
-        this.aiManager = new AIManager()//this, this.mapManager, this.house);
+        const houses = House.instantiateHouses();
+        this.aiManager = new AIManager(this, this.mapManager, houses);
         this.turnManager = new TurnManager(this, this.playerManager, this.aiManager);
 
         this.cameraController = new CameraController(this);

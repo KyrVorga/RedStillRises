@@ -14,8 +14,8 @@ export class PlayerManager {
     }
 
     notifyTurn(house) {
-        console.log('Player turn:', house);
         if (house === this.house.house) {
+            console.log('Player turn:', house);
             this.resetActionPoints();
             this.unlockControls();
         } else {
