@@ -17,6 +17,17 @@ export class Boot extends Scene
 
     create ()
     {
+        // Disable right-click context menu for the entire game container
+        this.input.mouse.disableContextMenu();
+
+        // Capture the right-click event, including Shift + Right Click
+        this.input.on('pointerdown', function (pointer) {
+            if (pointer.rightButtonDown()) {
+                pointer.event.preventDefault();  // Prevent default behavior
+                // Handle right-click actions here
+            }
+        });
+
         this.scene.start('Preloader');
     }
 }

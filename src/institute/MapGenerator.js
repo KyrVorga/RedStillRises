@@ -80,15 +80,6 @@ export class MapGenerator {
         }).filter(biome => biome !== null);
     }
 
-    getAdjacentTiles(q, r) {
-        const directions = [
-            { dq: 1, dr: 0 }, { dq: -1, dr: 0 },
-            { dq: 0, dr: 1 }, { dq: 0, dr: -1 },
-            { dq: 1, dr: -1 }, { dq: -1, dr: 1 }
-        ];
-        return directions.map(dir => ({ q: q + dir.dq, r: r + dir.dr }));
-    }
-
     isValidCastleTile(mapData, q, r) {
         const invalidBiomes = ['shallow', 'deep', 'swamp'];
         const adjacentBiomes = this.getAdjacentBiomes(mapData, q, r);
@@ -145,29 +136,39 @@ export class MapGenerator {
         }
         console.log(castleLocations);
 
-        const houses = [
-            'apollo',
-            'diana', 
-            'ceres', 
-            'juno', 
-            'jupiter', 
-            'mars', 
-            'mercury', 
-            'neptune', 
-            'pluto', 
-            'venus',
-            'vulcan',
-            'bacchus',
-            'minerva'
-        ];
+        const houses = {
+            apollo: { name: 'apollo', border: 'apollo_border'},
+            baccus: { name: 'baccus', border: 'baccus_border'},
+            ceres: { name: 'ceres', border: 'ceres_border'},
+            diana: { name: 'diana', border: 'diana_border'},
+            juno: { name: 'juno', border: 'juno_border'},
+            jupiter: { name: 'jupiter', border: 'jupiter_border'},
+            mars: { name: 'mars', border: 'mars_border'},
+            mercury: { name: 'mercury', border: 'mercury_border'},
+            minerva: { name: 'minerva', border: 'minerva_border'},
+            neptune: { name: 'neptune', border: 'neptune_border'},
+            pluto: { name: 'pluto', border: 'pluto_border'},
+            venus: { name: 'venus', border: 'venus_border'},
+            vulcan: { name: 'vulcan', border: 'vulcan_border'},
+            
+        }
+        
 
         // Assign houses and mark as castle tiles
         for (let i = 0; i < castleLocations.length; i++) {
+            const keys = Object.keys(houses);
+            const length = keys.length;
+            const houseKey = keys[i % length];
+            const house = houses[houseKey].name;
+            const border = houses[houseKey].border;
             const tile = castleLocations[i];
             tile.biome = 'castle';
-            tile.house = houses[i % houses.length];
-            tile.icon = houses[i % houses.length];
+            tile.house = house;
+            tile.icon = house;
+            tile.units = 50;
             tile.isCastle = true;
+            tile.owner = house;
+            tile.border = border;
         }
     }
 }

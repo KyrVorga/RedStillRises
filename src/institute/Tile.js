@@ -6,6 +6,8 @@ export class Tile {
         this.revealed = revealed;
         this.isOutpost = isOutpost;
         this.isCastle = isCastle;
+        this.units = 0;
+        this.owner = null;
     }
     
     static determineBiome(noiseValue) {
