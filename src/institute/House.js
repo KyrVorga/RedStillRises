@@ -27,4 +27,22 @@ export class House {
             this.resources[resourceType] = Math.max(0, this.resources[resourceType] - amount);
         }
     }
+
+    static instantiateHouses() {
+        return [
+            new House("Apollo"),
+            new House("Bacchus"),
+            new House("Ceres"),
+            new House("Diana"),
+            new House("Juno"),
+            new House("Jupiter"),
+            new House("Mars"),
+            new House("Mercury"),
+            new House("Minerva"),
+            new House("Neptune"),
+            new House("Pluto"),
+            new House("Venus"),
+            new House("Vulcan"),
+        ];
+    }
 }
