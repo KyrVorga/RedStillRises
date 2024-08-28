@@ -23,13 +23,11 @@ export class MapManager {
             const x = this.hexWidth * (3/4 * q);
             const y = this.hexHeight * (r + q / 2);
             const tileSprite = this.scene.add.image(x, y, biome);
-            // tileSprite.setScale(this.scaleFactor * this.zoomFactor); // Adjust scale based on zoom factor
             this.tileSprites.push(tileSprite);
 
             // display the tiles icon
             if (tile.icon) {
                 const icon = this.scene.add.image(x, y, tile.icon);
-                // icon.setScale(this.scaleFactor * this.zoomFactor); // Adjust scale based on zoom factor
                 if (!tile.isOutpost && !tile.isCastle) {
                     icon.setAlpha(0.5);
                 }
@@ -38,7 +36,6 @@ export class MapManager {
 
             if (!tile.revealed) {
                 const fogTile = this.scene.add.image(x, y, 'fog');
-                // fogTile.setScale(this.scaleFactor * this.zoomFactor); // Adjust scale based on zoom factor
                 this.fogTiles.push({ q: tile.q, r: tile.r, sprite: fogTile });
             }
         });
@@ -96,16 +93,5 @@ export class MapManager {
             tile.revealed = true;
         });
         this.rerenderMap();
-    }
-
-    setZoomFactor(zoomFactor) {
-        this.zoomFactor = zoomFactor;
-        this.rerenderMap();
-    }
-
-    setTileSize(tileSize) {
-        this.tileSize = tileSize;
-        console.log(this.tileSize);
-        this.calculateHexSize();
     }
 }
