@@ -1,5 +1,5 @@
 export class Tile {
-    constructor(q, r, x=null, y=null, biome = 'grassland', isOutpost = false, isCastle = false) {
+    constructor(q, r, biome, x=null, y=null, isOutpost = false, isCastle = false) {
         this.q = q;
         this.r = r;
         this.biome = biome;

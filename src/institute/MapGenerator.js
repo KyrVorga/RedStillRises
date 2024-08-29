@@ -31,7 +31,7 @@ export class MapGenerator {
     getRandomIcon(biome) {
         const pool = this.iconPools[biome] || [];
         if (Math.random() < 0.6 || pool.length === 0) {
-            return null; // 80% chance of no icon
+            return null;
         }
         const randomIndex = Math.floor(Math.random() * pool.length);
         return pool[randomIndex];

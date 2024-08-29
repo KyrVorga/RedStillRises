@@ -16,6 +16,9 @@ export class OverlayManager {
         overlay.fillRect(viewportWidth - this.margin, this.margin, this.margin, viewportHeight - 2 * this.margin);
         overlay.setScrollFactor(0);
 
+        // Set the depth to a high value to ensure it stays above other elements
+        overlay.setDepth(1000);
+
         return overlay;
     }
 }

@@ -1,9 +1,12 @@
 export class TurnManager {
-    constructor(scene, playerManager, aiManager) {
+    constructor(scene, playerManager, aiManager, mapManager, playerHouse) {
         this.scene = scene;
         
         this.playerManager = playerManager;
         this.aiManager = aiManager;
+        this.mapManager = mapManager;
+        this.playerHouse = playerHouse;
+
         const houses = [
             "Apollo",
             "Bacchus",
@@ -23,7 +26,6 @@ export class TurnManager {
         this.currentTurnIndex = 0;
     }
 
-    // Fisher-Yates shuffle algorithm to randomize the turn order
     shuffle(array) {
         for (let i = array.length - 1; i > 0; i--) {
             const j = Math.floor(Math.random() * (i + 1));
@@ -32,30 +34,24 @@ export class TurnManager {
         return array;
     }
 
-    // Move to the next turn
-    // nextTurn() {
-    //     this.currentTurnIndex = (this.currentTurnIndex + 1) % this.turnOrder.length;
-    //     const currentHouse = this.turnOrder[this.currentTurnIndex];
-    //     this.aiManager.notifyTurn(currentHouse);
-    //     this.playerManager.notifyTurn(currentHouse);
-    // }
-
-    // startGame() {
-    //     const currentHouse = this.turnOrder[this.currentTurnIndex];
-    //     this.aiManager.notifyTurn(currentHouse);
-    //     this.playerManager.notifyTurn(currentHouse);
-    // }
-
-    nextTurn() {
+    async nextTurn() {
         this.currentTurnIndex = (this.currentTurnIndex + 1) % this.turnOrder.length;
         const currentHouse = this.turnOrder[this.currentTurnIndex];
-        this.aiManager.notifyTurn('Diana');
-        this.playerManager.notifyTurn('Diana');
+
+        if (currentHouse === this.playerHouse) {
+            console.log("Player's turn started");
+            await this.playerManager.notifyTurn(currentHouse);
+            console.log("Player's turn ended");
+        } else {
+            console.log(currentHouse + "'s turn started");
+            await this.aiManager.notifyTurn(currentHouse);
+            console.log(currentHouse + "'s turn ended");
+        }
     }
 
-    startGame() {
-        const currentHouse = this.turnOrder[this.currentTurnIndex];
-        this.aiManager.notifyTurn('Diana');
-        this.playerManager.notifyTurn('Diana');
+    async startGame() {
+        while (true) {
+            await this.nextTurn();
+        }
     }
 }

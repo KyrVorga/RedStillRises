@@ -13,6 +13,8 @@ export class MapManager {
         this.tileIcons = []; // Store references to tile icons
         this.tileBorders = []; // Store references to tile borders
 
+        this.firstSplitMap = new Map(); // To track the first split from each tile
+
         this.calculateHexSize();
     }
 
@@ -20,7 +22,7 @@ export class MapManager {
         this.playerManager = playerManager;
     }
 
-    renderMap(house) {
+    async renderMap(house) {
         const revealedTiles = new Set(house.revealedTiles);
     
         // Render revealed tiles
@@ -45,7 +47,7 @@ export class MapManager {
                 const normalBorder = this.scene.add.image(x, y, 'normal_border');
                 this.tileBorders.push(normalBorder);
             }
-    
+
             const tileSprite = this.scene.add.image(x, y, biome);
             this.tileSprites.push(tileSprite);
     
@@ -87,7 +89,7 @@ export class MapManager {
         });
     }
 
-    rerenderMap(house) {
+    async rerenderMap(house) {
         this.tileSprites.forEach(sprite => sprite.destroy());
         this.fogTiles.forEach(fogTile => fogTile.sprite.destroy());
         this.tileIcons.forEach(icon => icon.destroy());
@@ -95,41 +97,45 @@ export class MapManager {
         this.fogTiles = [];
         this.tileIcons = [];
         this.calculateHexSize();
-        this.renderMap(house);
+        await this.renderMap(house);
     }
     
     checkActionValidity(house, source, dest) {
+        if (!house) {
+            // throw new Error('No house selected');
+        }
+
         if (!source) {
-            console.log('No source tile selected');
+            // console.log('No source tile selected');
             return false;
         }
 
         if (!dest) {
-            console.log('No destination tile selected');
+            // console.log('No destination tile selected');
             return false;
         }
 
         if (!this.isOwnedByHouse(source, house)) {
-            console.log('Selected tile is not owned by the player');
+            // console.log('Selected tile is not owned by the player');
             return false;
         }
         
         if (source.units < 1) {
-            console.log('No units to move');
+            // console.log('No units to move');
             return;
         }
         if (source === dest) {
-            console.log('Cannot move units to the same tile');
+            // console.log('Cannot move units to the same tile');
             return;
         }
 
         if (!this.isAdjacent(source, dest)) {
-            console.log('Clicked tile is not adjacent to the selected tile');
+            // console.log('Clicked tile is not adjacent to the selected tile');
             return false;
         }
 
         if (dest.biome === 'deep' || dest.biome === 'shallow') {
-            console.log('Cannot move units to water tiles');
+            // console.log('Cannot move units to water tiles');
             return false;
         }
 
@@ -144,17 +150,24 @@ export class MapManager {
         source.units -= units;
         dest.units += units;
 
-        console.log(`Transferred ${units} units from`, source, 'to', dest);
-
         if (source.units == 0) {
             return dest;
         }
         return source;
     }
 
+    moveUnits(house, source, dest, units) {
+        if (!this.checkActionValidity(house, source, dest)) return;
+        this.handleTileReveal(house, source, dest);
+        let tile = this.transferUnits(source, dest, units);
+        this.rerenderMap(house);
+        
+        return tile;
+    }
+
     moveOneUnit(house, source, dest) {
         if (!this.checkActionValidity(house, source, dest)) return;
-        this.handleTileReveal(source, dest);
+        this.handleTileReveal(house, source, dest);
         let tile = this.transferUnits(source, dest, 1);
         this.rerenderMap(house);
         
@@ -164,7 +177,7 @@ export class MapManager {
     moveHalfUnits(house, source, dest) {
         if (!this.checkActionValidity(house, source, dest)) return;
         const unitsToMove = Math.floor(source.units / 2);
-        this.handleTileReveal(source, dest);
+        this.handleTileReveal(house, source, dest);
         let tile = this.transferUnits(source, dest, unitsToMove);
         this.rerenderMap(house);
         
@@ -180,6 +193,63 @@ export class MapManager {
         return tile;
     }
 
+    
+    calculateActionCost(house, source, dest, units, actionType) {
+        let cost = 1; // Base cost
+
+        if (actionType === 'split') {
+            const sourceKey = `${source.q},${source.r}`;
+            const destKey = `${dest.q},${dest.r}`;
+
+            if (!this.firstSplitMap.has(sourceKey)) {
+                this.firstSplitMap.set(sourceKey, new Set());
+            }
+
+            const firstSplitsFromSource = this.firstSplitMap.get(sourceKey);
+
+            if (firstSplitsFromSource.has(destKey)) {
+                // Subsequent splits to the same tile cost nothing
+                cost = 0;
+            } else {
+                // First split to this tile
+                if (!dest.house) {
+                    // New unclaimed tile
+                    cost = 1;
+                } else {
+                    // Claimed tile
+                    cost = 0.25;
+                }
+                firstSplitsFromSource.add(destKey);
+            }
+        } else {
+            if (!dest.house) {
+                // New unclaimed tile
+                cost = 1;
+            } else if (dest.house !== house.name.toLowerCase()) {
+                // Attacking an enemy tile
+                cost = 1;
+            } else {
+                // Moving within owned territory
+                cost *= 0.75;
+            }
+
+            // Adjust cost based on biome
+            if (['greatwoods', 'swamp', 'mountain'].includes(dest.biome)) {
+                cost *= 1.5;
+            }
+        }
+        return cost;
+    }
+    
+    resetFirstSplits() {
+        this.firstSplitMap.clear();
+    }
+    
+    areTilesAdjacent(tileA, tileB) {
+        const adjacentTiles = this.getAdjacentTiles(tileA.q, tileA.r);
+        return adjacentTiles.some(tile => tile.q === tileB.q && tile.r === tileB.r);
+    }
+
     handleTileReveal(house, source, dest) {
         if (dest.house !== source.house && dest.units == 0) {
             dest.house = source.house;
@@ -193,11 +263,10 @@ export class MapManager {
 
     showTileDetails(tile) {
         // Placeholder for showing tile details in the info panel
-        console.log('Showing details for tile:', tile);
+        // console.log('Showing details for tile:', tile);
     }
 
     isOwnedByHouse(tile, house) {
-        console.log(tile.house, house);
         return tile.house === house.name.toLowerCase();
     }
 
@@ -272,5 +341,9 @@ export class MapManager {
         const x = this.hexWidth * (3/4 * q);
         const y = this.hexHeight * (r + q / 2);
         return { x, y };
+    }
+
+    getTile(q, r) {
+        return this.mapData.find(tile => tile.q === q && tile.r === r);
     }
 }

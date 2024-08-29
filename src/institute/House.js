@@ -4,7 +4,7 @@ export class House {
         this.units = units;
         this.resources = resources;
         this.turn = 0;
-        this.actions = 0;
+        this.actionPoints = 0;
         this.revealedTiles = [];
     }
 
@@ -27,6 +27,20 @@ export class House {
         if (this.resources[resourceType]) {
             this.resources[resourceType] = Math.max(0, this.resources[resourceType] - amount);
         }
+    }
+
+    resetActionPoints() {
+        this.actionPoints = 5;
+    }
+
+    canPerformAction(actionCost) {
+        return this.actionPoints >= actionCost;
+    }
+
+    performAction(actionCost) {
+        // console.log('Performing action:', actionCost);
+        this.actionPoints -= actionCost;
+        // console.log(this.name + ' has ' + this.actionPoints + ' action points left');
     }
 
     static instantiateHouses() {
