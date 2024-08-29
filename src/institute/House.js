@@ -5,6 +5,7 @@ export class House {
         this.resources = resources;
         this.turn = 0;
         this.actions = 0;
+        this.revealedTiles = [];
     }
 
     addUnits(units) {

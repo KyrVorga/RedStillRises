@@ -14,69 +14,68 @@ export class MapManager {
         this.tileBorders = []; // Store references to tile borders
 
         this.calculateHexSize();
-        this.renderMap();
     }
 
     setPlayerManager(playerManager) {
         this.playerManager = playerManager;
     }
 
-    renderMap() {
+    renderMap(house) {
         this.mapData.forEach((tile) => {
             const { q, r, biome } = tile;
             let x, y;
             if (!tile.x && !tile.y) {
                 x = this.hexWidth * (3/4 * q);
                 y = this.hexHeight * (r + q / 2);
-
+    
                 tile.x = x;
                 tile.y = y;
             } else {
                 x = tile.x;
                 y = tile.y;
             }
-
-            if (tile.house) {
-                const hexBorder = this.scene.add.image(x, y, tile.border);
-                this.tileBorders.push(hexBorder);
-            } else {
-                const normalBorder = this.scene.add.image(x, y, 'normal_border');
-                this.tileBorders.push(normalBorder);
-            }
-
-            const tileSprite = this.scene.add.image(x, y, biome);
-            this.tileSprites.push(tileSprite);
-
-            // Make the tile clickable
-            tileSprite.setInteractive();
-            tileSprite.on('pointerdown', (pointer) => this.playerManager.handleMapClick(pointer, tile));
-
-            // display the tiles icon
-            if (tile.icon) {
-                let icon;
-                if (!tile.isOutpost && !tile.isCastle) {
-                    icon = this.scene.add.image(x, y, tile.icon);
+    
+            if (house.revealedTiles.includes(tile)) {
+                if (tile.house) {
+                    const hexBorder = this.scene.add.image(x, y, tile.border);
+                    this.tileBorders.push(hexBorder);
                 } else {
-                    icon = this.scene.add.image(x, y-10, tile.icon);
+                    const normalBorder = this.scene.add.image(x, y, 'normal_border');
+                    this.tileBorders.push(normalBorder);
                 }
-                icon.setAlpha(0.5);
-                this.tileIcons.push(icon);
-            }
-
-            if (tile.units > 0) {
-                const unitText = this.scene.add.text(x, y + 25, tile.units, { fontSize: '20px', fill: '#000' });
-                unitText.setOrigin(0.5);
-                this.tileSprites.push(unitText);
-            }
-
-            if (!tile.revealed) {
+    
+                const tileSprite = this.scene.add.image(x, y, biome);
+                this.tileSprites.push(tileSprite);
+    
+                // Make the tile clickable
+                tileSprite.setInteractive();
+                tileSprite.on('pointerdown', (pointer) => this.playerManager.handleMapClick(pointer, tile));
+    
+                // display the tiles icon
+                if (tile.icon) {
+                    let icon;
+                    if (!tile.isOutpost && !tile.isCastle) {
+                        icon = this.scene.add.image(x, y, tile.icon);
+                    } else {
+                        icon = this.scene.add.image(x, y-10, tile.icon);
+                    }
+                    icon.setAlpha(0.5);
+                    this.tileIcons.push(icon);
+                }
+    
+                if (tile.units > 0) {
+                    const unitText = this.scene.add.text(x, y + 25, tile.units, { fontSize: '20px', fill: '#000' });
+                    unitText.setOrigin(0.5);
+                    this.tileSprites.push(unitText);
+                }
+            } else {
                 const fogTile = this.scene.add.image(x, y, 'fog');
                 this.fogTiles.push({ q: tile.q, r: tile.r, sprite: fogTile });
             }
         });
     }
 
-    rerenderMap() {
+    rerenderMap(house) {
         this.tileSprites.forEach(sprite => sprite.destroy());
         this.fogTiles.forEach(fogTile => fogTile.sprite.destroy());
         this.tileIcons.forEach(icon => icon.destroy());
@@ -84,7 +83,7 @@ export class MapManager {
         this.fogTiles = [];
         this.tileIcons = [];
         this.calculateHexSize();
-        this.renderMap();
+        this.renderMap(house);
     }
     
     checkActionValidity(house, source, dest) {
@@ -213,17 +212,6 @@ export class MapManager {
         this.hexHeight = Math.sqrt(3) / 2 * this.hexWidth;
     }
 
-    revealTile(q, r) {
-        const fogTile = this.fogTiles.find(tile => tile.q === q && tile.r === r);
-        const tile = this.mapData.find(tile => tile.q === q && tile.r === r);
-        if (!tile) return;
-        tile.revealed = true;
-        if (fogTile) {
-            fogTile.sprite.destroy();
-            this.fogTiles = this.fogTiles.filter(tile => tile !== fogTile);
-        }
-    }
-
     getAdjacentTiles(q, r) {
         const directions = [
             { dq: 1, dr: 0 }, { dq: -1, dr: 0 },
@@ -233,26 +221,53 @@ export class MapManager {
         return directions.map(dir => ({ q: q + dir.dq, r: r + dir.dr }));
     }
 
-    revealAdjacentTiles(q, r) {
+    revealTile(house, q, r) {
+        const fogTile = this.fogTiles.find(tile => tile.q === q && tile.r === r);
+        const tile = this.mapData.find(tile => tile.q === q && tile.r === r);
+
+        if (!tile) return;
+        if (!house.revealedTiles.includes(tile)) {
+            house.revealedTiles.push(tile);
+        }
+        if (fogTile) {
+            fogTile.sprite.destroy();
+            this.fogTiles = this.fogTiles.filter(tile => tile !== fogTile);
+        }
+    }
+    
+    revealAdjacentTiles(house, q, r) {
         const adjacentTiles = this.getAdjacentTiles(q, r);
-        console.log('Revealing adjacent tiles:', adjacentTiles);
         adjacentTiles.forEach(tile => {
-            this.revealTile(tile.q, tile.r);
+            this.revealTile(house, tile.q, tile.r);
+        });
+    }
+    
+    revealHouseTiles(houses) {
+        houses.forEach(house => {
+            const castles = this.getCastleTiles();
+            castles.forEach(castle => {
+                if (castle.house === house.name.toLowerCase()) {
+                    this.revealTile(house, castle.q, castle.r);
+                    this.revealAdjacentTiles(house, castle.q, castle.r);
+                }
+            });
         });
     }
 
-    revealAllTiles() {
+    revealAllTiles(house) {
         this.mapData.forEach(tile => {
-            tile.revealed = true;
+            house.revealedTiles.push(tile);
         });
         this.rerenderMap();
     }
 
-    revealPlayerHouseTile(house) {
-        const playerHouse = this.mapData.find(tile => tile.icon === house);
-        this.revealTile(playerHouse.q, playerHouse.r);
-        this.revealAdjacentTiles(playerHouse.q, playerHouse.r);
-        return playerHouse;
+    getCastleTiles() {
+        return this.mapData.filter(tile => tile.isCastle);
     }
 
+    getTileCoordinates(q, r) {
+        const x = this.hexWidth * (3/4 * q);
+        const y = this.hexHeight * (r + q / 2);
+        return { x, y };
+    }
 }

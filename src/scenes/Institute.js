@@ -137,18 +137,25 @@ export class Institute extends Scene {
         background.setDepth(-1); 
         background.setScale(0.75);
 
+        const houses = House.instantiateHouses();
+        
         this.mapManager = new MapManager(this, this.mapData, this.tileSize);
-        const playerHouse = this.mapManager.revealPlayerHouseTile(this.house);
+        this.mapManager.revealHouseTiles(houses);
+        this.playerHouse = houses.find((house) => house.name.toLowerCase() === this.house);
+        this.aiHouses = houses.filter((house) => house.name.toLowerCase() !== this.house);
+        console.log(this.aiHouses)
 
-        this.playerManager = new PlayerManager(this, this.mapManager, playerHouse);
+        this.playerManager = new PlayerManager(this, this.mapManager, this.playerHouse);
         this.mapManager.setPlayerManager(this.playerManager);
         
-        const houses = House.instantiateHouses();
-        this.aiManager = new AIManager(this, this.mapManager, houses);
+        this.aiManager = new AIManager(this, this.mapManager, this.aiHouses);
         this.turnManager = new TurnManager(this, this.playerManager, this.aiManager);
 
+        const playerHouseTile = this.playerHouse.revealedTiles.find((tile) => tile.icon === this.playerHouse.name.toLowerCase());
+        let {x, y} = this.mapManager.getTileCoordinates(playerHouseTile.q, playerHouseTile.r);
+
         this.cameraController = new CameraController(this);
-        this.cameraController.initializeCamera(playerHouse.x, playerHouse.y, 1);
+        this.cameraController.initializeCamera(x, y, 1);
         this.cameraController.enablePanning();
 
         // Tooltip setup
@@ -206,7 +213,7 @@ export class Institute extends Scene {
         // this.overlay = this.overlayManager.createOverlay();
 
 
-
+        this.mapManager.renderMap(this.playerHouse);
         this.turnManager.startGame();
     }
 }

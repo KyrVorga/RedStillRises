@@ -16,7 +16,7 @@ export class AIManager {
 
     takeTurn(houseName) {
         const house = this.houses.find(house => house.name === houseName);
-        const tiles = this.mapManager.getTilesByHouse(houseName);
+        console.log(house);
 
     }
 
