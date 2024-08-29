@@ -32,22 +32,30 @@ export class TurnManager {
         return array;
     }
 
-    // Check if it's the given player's turn
-    isPlayerTurn(player) {
-        return this.turnOrder[this.currentTurnIndex] === player;
-    }
-
     // Move to the next turn
+    // nextTurn() {
+    //     this.currentTurnIndex = (this.currentTurnIndex + 1) % this.turnOrder.length;
+    //     const currentHouse = this.turnOrder[this.currentTurnIndex];
+    //     this.aiManager.notifyTurn(currentHouse);
+    //     this.playerManager.notifyTurn(currentHouse);
+    // }
+
+    // startGame() {
+    //     const currentHouse = this.turnOrder[this.currentTurnIndex];
+    //     this.aiManager.notifyTurn(currentHouse);
+    //     this.playerManager.notifyTurn(currentHouse);
+    // }
+
     nextTurn() {
         this.currentTurnIndex = (this.currentTurnIndex + 1) % this.turnOrder.length;
         const currentHouse = this.turnOrder[this.currentTurnIndex];
-        this.aiManager.notifyTurn(currentHouse);
-        this.playerManager.notifyTurn(currentHouse);
+        this.aiManager.notifyTurn('Diana');
+        this.playerManager.notifyTurn('Diana');
     }
 
     startGame() {
         const currentHouse = this.turnOrder[this.currentTurnIndex];
-        this.aiManager.notifyTurn(currentHouse);
-        this.playerManager.notifyTurn(currentHouse);
+        this.aiManager.notifyTurn('Diana');
+        this.playerManager.notifyTurn('Diana');
     }
 }

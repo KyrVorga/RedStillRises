@@ -60,23 +60,23 @@ export class Institute extends Scene {
 
         const iconWidth = this.tileSize * 0.6;
         const iconHeight = this.tileSize * 0.6;
-        const houseIconWidth = this.tileSize * 0.4;
-        const houseIconHeight = this.tileSize * 0.4;
+        const smallIconWidth = this.tileSize * 0.4;
+        const smallIconHeight = this.tileSize * 0.4;
 
         // Load house logo svgs
-        this.load.svg('apollo', "assets/icons/house/apollo.svg", { width: houseIconWidth, height: houseIconHeight });
-        this.load.svg('bacchus', "assets/icons/house/bacchus.svg", { width: houseIconWidth, height: houseIconHeight });
-        this.load.svg('ceres', "assets/icons/house/ceres.svg", { width: houseIconWidth, height: houseIconHeight });
-        this.load.svg('diana', "assets/icons/house/diana.svg", { width: houseIconWidth, height: houseIconHeight });
-        this.load.svg('juno', "assets/icons/house/juno.svg", { width: houseIconWidth, height: houseIconHeight });
-        this.load.svg('jupiter', "assets/icons/house/jupiter.svg", { width: houseIconWidth, height: houseIconHeight });
-        this.load.svg('mars', "assets/icons/house/mars.svg", { width: houseIconWidth, height: houseIconHeight });
-        this.load.svg('mercury', "assets/icons/house/mercury.svg", { width: houseIconWidth, height: houseIconHeight });
-        this.load.svg('minerva', "assets/icons/house/minerva.svg", { width: houseIconWidth, height: houseIconHeight });
-        this.load.svg('neptune', "assets/icons/house/neptune.svg", { width: houseIconWidth, height: houseIconHeight });
-        this.load.svg('pluto', "assets/icons/house/pluto.svg", { width: houseIconWidth, height: houseIconHeight });
-        this.load.svg('venus', "assets/icons/house/venus.svg", { width: houseIconWidth, height: houseIconHeight });
-        this.load.svg('vulcan', "assets/icons/house/vulcan.svg", { width: houseIconWidth, height: houseIconHeight });
+        this.load.svg('apollo', "assets/icons/house/apollo.svg", { width: iconWidth, height: iconHeight });
+        this.load.svg('bacchus', "assets/icons/house/bacchus.svg", { width: iconWidth, height: iconHeight });
+        this.load.svg('ceres', "assets/icons/house/ceres.svg", { width: iconWidth, height: iconHeight });
+        this.load.svg('diana', "assets/icons/house/diana.svg", { width: iconWidth, height: iconHeight });
+        this.load.svg('juno', "assets/icons/house/juno.svg", { width: iconWidth, height: iconHeight });
+        this.load.svg('jupiter', "assets/icons/house/jupiter.svg", { width: iconWidth, height: iconHeight });
+        this.load.svg('mars', "assets/icons/house/mars.svg", { width: iconWidth, height: iconHeight });
+        this.load.svg('mercury', "assets/icons/house/mercury.svg", { width: iconWidth, height: iconHeight });
+        this.load.svg('minerva', "assets/icons/house/minerva.svg", { width: iconWidth, height: iconHeight });
+        this.load.svg('neptune', "assets/icons/house/neptune.svg", { width: iconWidth, height: iconHeight });
+        this.load.svg('pluto', "assets/icons/house/pluto.svg", { width: iconWidth, height: iconHeight });
+        this.load.svg('venus', "assets/icons/house/venus.svg", { width: iconWidth, height: iconHeight });
+        this.load.svg('vulcan', "assets/icons/house/vulcan.svg", { width: iconWidth, height: iconHeight });
 
         //load tile icons
         this.load.svg('forest_1', "assets/icons/forest/forest_1.svg", { width: iconWidth, height: iconHeight });
@@ -125,6 +125,68 @@ export class Institute extends Scene {
         this.load.svg('outpost_3', "assets/icons/outpost/outpost_3.svg", { width: iconWidth, height: iconHeight });
         this.load.svg('outpost_4', "assets/icons/outpost/outpost_4.svg", { width: iconWidth, height: iconHeight });
         this.load.svg('outpost_5', "assets/icons/outpost/outpost_5.svg", { width: iconWidth, height: iconHeight });
+
+        //load smaller tile icons
+        this.load.svg('apollo_small', "assets/icons/house/apollo.svg", { width: smallIconWidth, height: smallIconHeight });
+        this.load.svg('bacchus_small', "assets/icons/house/bacchus.svg", { width: smallIconWidth, height: smallIconHeight });
+        this.load.svg('ceres_small', "assets/icons/house/ceres.svg", { width: smallIconWidth, height: smallIconHeight });
+        this.load.svg('diana_small', "assets/icons/house/diana.svg", { width: smallIconWidth, height: smallIconHeight });
+        this.load.svg('juno_small', "assets/icons/house/juno.svg", { width: smallIconWidth, height: smallIconHeight });
+        this.load.svg('jupiter_small', "assets/icons/house/jupiter.svg", { width: smallIconWidth, height: smallIconHeight });
+        this.load.svg('mars_small', "assets/icons/house/mars.svg", { width: smallIconWidth, height: smallIconHeight });
+        this.load.svg('mercury_small', "assets/icons/house/mercury.svg", { width: smallIconWidth, height: smallIconHeight });
+        this.load.svg('minerva_small', "assets/icons/house/minerva.svg", { width: smallIconWidth, height: smallIconHeight });
+        this.load.svg('neptune_small', "assets/icons/house/neptune.svg", { width: smallIconWidth, height: smallIconHeight });
+        this.load.svg('pluto_small', "assets/icons/house/pluto.svg", { width: smallIconWidth, height: smallIconHeight });
+        this.load.svg('venus_small', "assets/icons/house/venus.svg", { width: smallIconWidth, height: smallIconHeight });
+        this.load.svg('vulcan_small', "assets/icons/house/vulcan.svg", { width: smallIconWidth, height: smallIconHeight });
+
+        this.load.svg('forest_1_small', "assets/icons/forest/forest_1.svg", { width: smallIconWidth, height: smallIconHeight });
+        this.load.svg('forest_2_small', "assets/icons/forest/forest_2.svg", { width: smallIconWidth, height: smallIconHeight });
+        this.load.svg('forest_3_small', "assets/icons/forest/forest_3.svg", { width: smallIconWidth, height: smallIconHeight });
+
+        this.load.svg('grassland_1_small', "assets/icons/grassland/grassland_1.svg", { width: smallIconWidth, height: smallIconHeight });
+
+        this.load.svg('farmland_1_small', "assets/icons/farmland/farmland_1.svg", { width: smallIconWidth, height: smallIconHeight });
+
+        this.load.svg('greatwood_1_small', "assets/icons/greatwood/greatwood_1.svg", { width: smallIconWidth, height: smallIconHeight });
+        this.load.svg('greatwood_2_small', "assets/icons/greatwood/greatwood_2.svg", { width: smallIconWidth, height: smallIconHeight });
+        this.load.svg('greatwood_3_small', "assets/icons/greatwood/greatwood_3.svg", { width: smallIconWidth, height: smallIconHeight });
+        this.load.svg('greatwood_4_small', "assets/icons/greatwood/greatwood_4.svg", { width: smallIconWidth, height: smallIconHeight });
+
+        this.load.svg('squiggle_1_small', "assets/icons/squiggle/squiggle_1.svg", { width: smallIconWidth, height: smallIconHeight });
+        this.load.svg('squiggle_2_small', "assets/icons/squiggle/squiggle_2.svg", { width: smallIconWidth, height: smallIconHeight });
+        this.load.svg('squiggle_3_small', "assets/icons/squiggle/squiggle_3.svg", { width: smallIconWidth, height: smallIconHeight });
+
+        this.load.svg('hill_1_small', "assets/icons/hill/hill_1.svg", { width: smallIconWidth, height: smallIconHeight });
+        this.load.svg('hill_2_small', "assets/icons/hill/hill_2.svg", { width: smallIconWidth, height: smallIconHeight });
+        this.load.svg('hill_3_small', "assets/icons/hill/hill_3.svg", { width: smallIconWidth, height: smallIconHeight });
+        this.load.svg('hill_4_small', "assets/icons/hill/hill_4.svg", { width: smallIconWidth, height: smallIconHeight });
+        this.load.svg('hill_5_small', "assets/icons/hill/hill_5.svg", { width: smallIconWidth, height: smallIconHeight });
+        this.load.svg('hill_6_small', "assets/icons/hill/hill_6.svg", { width: smallIconWidth, height: smallIconHeight });
+
+        this.load.svg('mountain_1_small', "assets/icons/mountain/mountain_1.svg", { width: smallIconWidth, height: smallIconHeight });
+        this.load.svg('mountain_2_small', "assets/icons/mountain/mountain_2.svg", { width: smallIconWidth, height: smallIconHeight });
+        this.load.svg('mountain_3_small', "assets/icons/mountain/mountain_3.svg", { width: smallIconWidth, height: smallIconHeight });
+        this.load.svg('mountain_4_small', "assets/icons/mountain/mountain_4.svg", { width: smallIconWidth, height: smallIconHeight });
+        this.load.svg('mountain_5_small', "assets/icons/mountain/mountain_5.svg", { width: smallIconWidth, height: smallIconHeight });
+        this.load.svg('mountain_6_small', "assets/icons/mountain/mountain_6.svg", { width: smallIconWidth, height: smallIconHeight });
+
+        this.load.svg('swamp_1_small', "assets/icons/swamp/swamp_1.svg", { width: smallIconWidth, height: smallIconHeight });
+        this.load.svg('swamp_2_small', "assets/icons/swamp/swamp_2.svg", { width: smallIconWidth, height: smallIconHeight });
+        this.load.svg('swamp_3_small', "assets/icons/swamp/swamp_3.svg", { width: smallIconWidth, height: smallIconHeight });
+        this.load.svg('swamp_4_small', "assets/icons/swamp/swamp_4.svg", { width: smallIconWidth, height: smallIconHeight });
+
+        this.load.svg('tundra_1_small', "assets/icons/tundra/tundra_1.svg", { width: smallIconWidth, height: smallIconHeight });
+        this.load.svg('tundra_2_small', "assets/icons/tundra/tundra_2.svg", { width: smallIconWidth, height: smallIconHeight });
+        this.load.svg('tundra_3_small', "assets/icons/tundra/tundra_3.svg", { width: smallIconWidth, height: smallIconHeight });
+        this.load.svg('tundra_4_small', "assets/icons/tundra/tundra_4.svg", { width: smallIconWidth, height: smallIconHeight });
+
+        this.load.svg('outpost_1_small', "assets/icons/outpost/outpost_1.svg", { width: smallIconWidth, height: smallIconHeight });
+        this.load.svg('outpost_2_small', "assets/icons/outpost/outpost_2.svg", { width: smallIconWidth, height: smallIconHeight });
+        this.load.svg('outpost_3_small', "assets/icons/outpost/outpost_3.svg", { width: smallIconWidth, height: smallIconHeight });
+        this.load.svg('outpost_4_small', "assets/icons/outpost/outpost_4.svg", { width: smallIconWidth, height: smallIconHeight });
+        this.load.svg('outpost_5_small', "assets/icons/outpost/outpost_5.svg", { width: smallIconWidth, height: smallIconHeight });
     }
 
     create() {
@@ -142,6 +204,7 @@ export class Institute extends Scene {
         this.mapManager = new MapManager(this, this.mapData, this.tileSize);
         this.mapManager.revealHouseTiles(houses);
         this.playerHouse = houses.find((house) => house.name.toLowerCase() === this.house);
+        console.log(this.playerHouse)
         this.aiHouses = houses.filter((house) => house.name.toLowerCase() !== this.house);
         console.log(this.aiHouses)
 
@@ -212,7 +275,7 @@ export class Institute extends Scene {
         // this.overlayManager = new OverlayManager(this, this.margin);
         // this.overlay = this.overlayManager.createOverlay();
 
-
+        this.mapManager.revealAllTiles(this.playerHouse);
         this.mapManager.renderMap(this.playerHouse);
         this.turnManager.startGame();
     }

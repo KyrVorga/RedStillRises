@@ -138,7 +138,7 @@ export class MapGenerator {
 
         const houses = {
             apollo: { name: 'apollo', border: 'apollo_border'},
-            baccus: { name: 'baccus', border: 'baccus_border'},
+            baccus: { name: 'bacchus', border: 'bacchus_border'},
             ceres: { name: 'ceres', border: 'ceres_border'},
             diana: { name: 'diana', border: 'diana_border'},
             juno: { name: 'juno', border: 'juno_border'},

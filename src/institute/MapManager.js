@@ -21,7 +21,10 @@ export class MapManager {
     }
 
     renderMap(house) {
-        this.mapData.forEach((tile) => {
+        const revealedTiles = new Set(house.revealedTiles);
+    
+        // Render revealed tiles
+        revealedTiles.forEach((tile) => {
             const { q, r, biome } = tile;
             let x, y;
             if (!tile.x && !tile.y) {
@@ -35,43 +38,52 @@ export class MapManager {
                 y = tile.y;
             }
     
-            if (house.revealedTiles.includes(tile)) {
-                if (tile.house) {
-                    const hexBorder = this.scene.add.image(x, y, tile.border);
-                    this.tileBorders.push(hexBorder);
-                } else {
-                    const normalBorder = this.scene.add.image(x, y, 'normal_border');
-                    this.tileBorders.push(normalBorder);
-                }
-    
-                const tileSprite = this.scene.add.image(x, y, biome);
-                this.tileSprites.push(tileSprite);
-    
-                // Make the tile clickable
-                tileSprite.setInteractive();
-                tileSprite.on('pointerdown', (pointer) => this.playerManager.handleMapClick(pointer, tile));
-    
-                // display the tiles icon
-                if (tile.icon) {
-                    let icon;
-                    if (!tile.isOutpost && !tile.isCastle) {
-                        icon = this.scene.add.image(x, y, tile.icon);
-                    } else {
-                        icon = this.scene.add.image(x, y-10, tile.icon);
-                    }
-                    icon.setAlpha(0.5);
-                    this.tileIcons.push(icon);
-                }
-    
-                if (tile.units > 0) {
-                    const unitText = this.scene.add.text(x, y + 25, tile.units, { fontSize: '20px', fill: '#000' });
-                    unitText.setOrigin(0.5);
-                    this.tileSprites.push(unitText);
-                }
+            if (tile.house) {
+                const hexBorder = this.scene.add.image(x, y, tile.border);
+                this.tileBorders.push(hexBorder);
             } else {
-                const fogTile = this.scene.add.image(x, y, 'fog');
-                this.fogTiles.push({ q: tile.q, r: tile.r, sprite: fogTile });
+                const normalBorder = this.scene.add.image(x, y, 'normal_border');
+                this.tileBorders.push(normalBorder);
             }
+    
+            const tileSprite = this.scene.add.image(x, y, biome);
+            this.tileSprites.push(tileSprite);
+    
+            // Make the tile clickable
+            tileSprite.setInteractive();
+            tileSprite.on('pointerdown', (pointer) => this.playerManager.handleMapClick(pointer, tile));
+    
+    
+            if (tile.units > 0) {
+                const unitText = this.scene.add.text(x, y + 25, tile.units, { fontSize: '20px', fill: '#000' });
+                unitText.setOrigin(0.5);
+                this.tileSprites.push(unitText);
+            }
+
+            // Display the tile's icon
+            if (tile.icon) {
+                let icon;
+                if (!tile.units > 0) {
+                    icon = this.scene.add.image(x, y, tile.icon);
+                } else {
+                    icon = this.scene.add.image(x, y-10, tile.icon + '_small');
+                }
+                icon.setAlpha(0.5);
+                this.tileIcons.push(icon);
+            }
+        });
+    
+        // Render fog tiles for adjacent spaces
+        revealedTiles.forEach((tile) => {
+            const adjacentTiles = this.getAdjacentTiles(tile.q, tile.r);
+            adjacentTiles.forEach(adjTile => {
+                const adjTileData = this.mapData.find(t => t.q === adjTile.q && t.r === adjTile.r);
+                if (adjTileData && !revealedTiles.has(adjTileData)) {
+                    const { x, y } = this.getTileCoordinates(adjTile.q, adjTile.r);
+                    const fogTile = this.scene.add.image(x, y, 'fog');
+                    this.fogTiles.push({ q: adjTile.q, r: adjTile.r, sprite: fogTile });
+                }
+            });
         });
     }
 
@@ -144,7 +156,7 @@ export class MapManager {
         if (!this.checkActionValidity(house, source, dest)) return;
         this.handleTileReveal(source, dest);
         let tile = this.transferUnits(source, dest, 1);
-        this.rerenderMap();
+        this.rerenderMap(house);
         
         return tile;
     }
@@ -154,25 +166,25 @@ export class MapManager {
         const unitsToMove = Math.floor(source.units / 2);
         this.handleTileReveal(source, dest);
         let tile = this.transferUnits(source, dest, unitsToMove);
-        this.rerenderMap();
+        this.rerenderMap(house);
         
         return tile;
     }
 
     moveAllUnits(house, source, dest) {
         if (!this.checkActionValidity(house, source, dest)) return;
-        this.handleTileReveal(source, dest);
+        this.handleTileReveal(house, source, dest);
         let tile = this.transferUnits(source, dest, source.units);
-        this.rerenderMap();
+        this.rerenderMap(house);
         
         return tile;
     }
 
-    handleTileReveal(source, dest) {
+    handleTileReveal(house, source, dest) {
         if (dest.house !== source.house && dest.units == 0) {
             dest.house = source.house;
             dest.border = source.border;
-            this.revealAdjacentTiles(dest.q, dest.r);
+            this.revealAdjacentTiles(house, dest.q, dest.r);
 
             return true;
         }
@@ -184,14 +196,9 @@ export class MapManager {
         console.log('Showing details for tile:', tile);
     }
 
-    canPerformAction() {
-        // Placeholder for checking if the user can perform this action on their turn given their action points
-        return true;
-    }
-
     isOwnedByHouse(tile, house) {
         console.log(tile.house, house);
-        return tile.house === house;
+        return tile.house === house.name.toLowerCase();
     }
 
     isAdjacent(tile1, tile2) {
@@ -222,21 +229,17 @@ export class MapManager {
     }
 
     revealTile(house, q, r) {
-        const fogTile = this.fogTiles.find(tile => tile.q === q && tile.r === r);
         const tile = this.mapData.find(tile => tile.q === q && tile.r === r);
-
         if (!tile) return;
+
         if (!house.revealedTiles.includes(tile)) {
             house.revealedTiles.push(tile);
-        }
-        if (fogTile) {
-            fogTile.sprite.destroy();
-            this.fogTiles = this.fogTiles.filter(tile => tile !== fogTile);
         }
     }
     
     revealAdjacentTiles(house, q, r) {
         const adjacentTiles = this.getAdjacentTiles(q, r);
+        
         adjacentTiles.forEach(tile => {
             this.revealTile(house, tile.q, tile.r);
         });
@@ -258,7 +261,7 @@ export class MapManager {
         this.mapData.forEach(tile => {
             house.revealedTiles.push(tile);
         });
-        this.rerenderMap();
+        this.rerenderMap(house);
     }
 
     getCastleTiles() {
