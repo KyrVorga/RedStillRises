@@ -2,6 +2,7 @@ export class OverlayManager {
     constructor(scene, margin) {
         this.scene = scene;
         this.margin = margin;
+        this.mode = 'default';
     }
 
     createOverlay() {
@@ -21,7 +22,6 @@ export class OverlayManager {
 
         return overlay;
     }
-    
     
     createEndTurnButton(callback) {
         const viewportWidth = this.scene.cameras.main.width;
@@ -45,10 +45,47 @@ export class OverlayManager {
             callback();
         })
         .on('pointerover', () => buttonText.setStyle({ fill: '#0f0' }))
-        .on('pointerout', () => buttonText.setStyle({ fill: '#00cd0d' }))
+        .on('pointerout', () => buttonText.setStyle({ fill: '#00cd0d' }));
     
         this.scene.input.setTopOnly(true); // Make sure only the topmost object gets the click
 
         return buttonText;
+    }
+
+    createToggleViewButton(callback) {
+        const viewportWidth = this.scene.cameras.main.width;
+        const marginRight = 5;
+        const marginTop = 50; // Adjust as needed
+        const buttonSize = 40;
+
+        // Create the eye icon
+        const buttonIcon = this.scene.add.image(
+            viewportWidth - buttonSize / 2 - marginRight,
+            buttonSize / 2 + marginTop,
+            'eye', 
+            { fill: '#00cd0d' }
+        ).setOrigin(0.5)
+        .setScrollFactor(0)
+        .setDepth(1002) // Ensure the icon is above the background
+        .setInteractive({ useHandCursor: true });
+
+        // Add click event to toggle view and switch icons
+        buttonIcon.on('pointerdown', () => {
+            console.log('Toggle button clicked');
+            callback(this.mode);
+
+            // Switch icons
+            const currentTexture = buttonIcon.texture.key;
+            const newTexture = currentTexture === 'eye' ? 'eye-off' : 'eye';
+            buttonIcon.setTexture(newTexture);
+        });
+
+        if (this.mode === 'default') {
+            this.mode = 'resource';
+        } else {
+            this.mode = 'default';
+        }
+
+        return buttonIcon;
     }
 }

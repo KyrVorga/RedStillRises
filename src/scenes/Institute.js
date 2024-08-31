@@ -27,6 +27,8 @@ export class Institute extends Scene {
 
     preload() {
         const borderlessSize = this.tileSize - 8;
+        const occupiedSize = this.tileSize - 16;
+
         this.load.svg('grassland', 'assets/tiles/Grassland.svg', { width: borderlessSize, height: borderlessSize });
         this.load.svg('mountain', 'assets/tiles/Mountain.svg', { width: borderlessSize, height: borderlessSize });
         this.load.svg('hill', 'assets/tiles/Hill.svg', { width: borderlessSize, height: borderlessSize });
@@ -39,8 +41,25 @@ export class Institute extends Scene {
         this.load.svg('castle', 'assets/tiles/Castle.svg', { width: borderlessSize, height: borderlessSize });
         this.load.svg('shallow', 'assets/tiles/Shallow.svg', { width: borderlessSize, height: borderlessSize });
         this.load.svg('deep', 'assets/tiles/Deep.svg', { width: borderlessSize, height: borderlessSize });
+
+        
+        this.load.svg('grassland_occupied', 'assets/tiles/Grassland.svg', { width: occupiedSize, height: occupiedSize });
+        this.load.svg('mountain_occupied', 'assets/tiles/Mountain.svg', { width: occupiedSize, height: occupiedSize });
+        this.load.svg('hill_occupied', 'assets/tiles/Hill.svg', { width: occupiedSize, height: occupiedSize });
+        this.load.svg('forest_occupied', 'assets/tiles/Forest.svg', { width: occupiedSize, height: occupiedSize });
+        this.load.svg('greatwood_occupied', 'assets/tiles/Greatwood.svg', { width: occupiedSize, height: occupiedSize });
+        this.load.svg('farmland_occupied', 'assets/tiles/Farmland.svg', { width: occupiedSize, height: occupiedSize });
+        this.load.svg('desert_occupied', 'assets/tiles/Desert.svg', { width: occupiedSize, height: occupiedSize });
+        this.load.svg('swamp_occupied', 'assets/tiles/Swamp.svg', { width: occupiedSize, height: occupiedSize });
+        this.load.svg('tundra_occupied', 'assets/tiles/Tundra.svg', { width: occupiedSize, height: occupiedSize });
+        this.load.svg('castle_occupied', 'assets/tiles/Castle.svg', { width: occupiedSize, height: occupiedSize });
+        this.load.svg('shallow_occupied', 'assets/tiles/Shallow.svg', { width: occupiedSize, height: occupiedSize });
+        this.load.svg('deep_occupied', 'assets/tiles/Deep.svg', { width: occupiedSize, height: occupiedSize });
         
         this.load.svg('fog', 'assets/tiles/Fog.svg', { width: this.tileSize, height: this.tileSize });
+
+        this.load.svg('eye', 'assets/eye.svg', { width: 32, height: 32 });
+        this.load.svg('eye-off', 'assets/eye-off.svg', { width: 32, height: 32 });
 
         this.load.svg('apollo_border', 'assets/tiles/ApolloBorder.svg', { width: this.tileSize, height: this.tileSize });
         this.load.svg('bacchus_border', 'assets/tiles/BacchusBorder.svg', { width: this.tileSize, height: this.tileSize });
@@ -58,8 +77,8 @@ export class Institute extends Scene {
         this.load.svg('normal_border', 'assets/tiles/NormalBorder.svg', { width: this.tileSize, height: this.tileSize });
 
 
-        const iconWidth = this.tileSize * 0.6;
-        const iconHeight = this.tileSize * 0.6;
+        const iconWidth = this.tileSize * 0.55;
+        const iconHeight = this.tileSize * 0.55;
         const smallIconWidth = this.tileSize * 0.4;
         const smallIconHeight = this.tileSize * 0.4;
 

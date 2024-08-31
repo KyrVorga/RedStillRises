@@ -24,9 +24,20 @@ export class MapManager {
         this.playerManager = playerManager;
     }
 
+    changeRenderMode(mode) {
+        const renderModes = ['normal', 'resource'];
+        if (!renderModes.includes(mode)) return;
+        this.renderMode = mode;
+    }
+
     async renderMap() {
         const revealedTiles = new Set(this.playerHouse.revealedTiles);
-    
+
+        // Create tooltip if it doesn't exist
+        if (!this.tooltip) {
+            this.createTooltip();
+        }
+
         // Render revealed tiles
         revealedTiles.forEach((tile) => {
             const { q, r, biome } = tile;
@@ -34,30 +45,45 @@ export class MapManager {
             if (!tile.x && !tile.y) {
                 x = this.hexWidth * (3/4 * q);
                 y = this.hexHeight * (r + q / 2);
-    
+
                 tile.x = x;
                 tile.y = y;
             } else {
                 x = tile.x;
                 y = tile.y;
             }
-    
-            if (tile.house) {
-                const hexBorder = this.scene.add.image(x, y, tile.border);
-                this.tileBorders.push(hexBorder);
-            } else {
-                const normalBorder = this.scene.add.image(x, y, 'normal_border');
-                this.tileBorders.push(normalBorder);
-            }
 
-            const tileSprite = this.scene.add.image(x, y, biome);
-            this.tileSprites.push(tileSprite);
-    
+            let tileBorder;
+            if (tile.house) {
+                tileBorder = this.scene.add.image(x, y, tile.border);
+            } else {
+                tileBorder = this.scene.add.image(x, y, 'normal_border');
+            }
+            this.tileBorders.push(tileBorder);
+
+            let tileBackground;
+            if (tile.house) {
+                tileBackground = this.scene.add.image(x, y, biome + '_occupied');
+            } else {
+                tileBackground = this.scene.add.image(x, y, biome);
+            }
+            this.tileSprites.push(tileBackground);
+
             // Make the tile clickable
-            tileSprite.setInteractive();
-            tileSprite.on('pointerdown', (pointer) => this.playerManager.handleMapClick(pointer, tile));
-    
-    
+            tileBackground.setInteractive();
+            tileBackground.on('pointerdown', (pointer) => this.playerManager.handleMapClick(pointer, tile));
+
+            // Add hover event to show tooltip
+            tileBackground.on('pointerover', () => {
+                const actionCost = this.calculateActionCost(this.playerHouse, this.selectedTile, tile, 1, 'move');
+                const tooltipText = `Tile: ${tile.q}, ${tile.r}\nBiome: ${tile.biome}\nAction Cost: ${actionCost}`;
+                this.showTooltip(x, y - 20, tooltipText);
+            });
+
+            tileBackground.on('pointerout', () => {
+                this.hideTooltip();
+            });
+
             if (tile.units > 0) {
                 const unitText = this.scene.add.text(x, y + 25, tile.units, { fontSize: '20px', fill: '#000' });
                 unitText.setOrigin(0.5);
@@ -76,7 +102,7 @@ export class MapManager {
                 this.tileIcons.push(icon);
             }
         });
-    
+
         // Render fog tiles for adjacent spaces
         revealedTiles.forEach((tile) => {
             const adjacentTiles = this.getAdjacentTiles(tile.q, tile.r);
@@ -400,5 +426,25 @@ export class MapManager {
 
     getTile(q, r) {
         return this.mapData.find(tile => tile.q === q && tile.r === r);
+    }
+
+    createTooltip() {
+        this.tooltip = this.scene.add.text(0, 0, '', {
+            fontSize: '16px',
+            fill: '#fff',
+            backgroundColor: '#000',
+            padding: { x: 10, y: 5 },
+            borderRadius: 5
+        }).setDepth(1003).setVisible(false);
+    }
+
+    showTooltip(x, y, text) {
+        this.tooltip.setText(text);
+        this.tooltip.setPosition(x, y);
+        this.tooltip.setVisible(true);
+    }
+
+    hideTooltip() {
+        this.tooltip.setVisible(false);
     }
 }

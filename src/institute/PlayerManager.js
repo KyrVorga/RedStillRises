@@ -20,6 +20,11 @@ export class PlayerManager {
         // Initialize OverlayManager
         this.overlayManager = new OverlayManager(this.scene, 40); // Adjust margin as needed
         this.overlay = this.overlayManager.createOverlay();
+        this.overlayManager.createToggleViewButton(this.changeRenderMode.bind(this));
+    }
+
+    changeRenderMode(mode) {
+        this.mapManager.changeRenderMode(mode);
     }
 
     async notifyTurn(house) {
