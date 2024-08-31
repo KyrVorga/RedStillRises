@@ -52,6 +52,7 @@ export class MapGenerator {
                 }
 
                 const tile = new Tile(q, r, biome);
+                tile.initializeResourcesAndBonuses();
 
                 // 5% chance for non-water tiles to become outposts
                 if (biome !== 'shallow' && biome !== 'deep' && Math.random() < 0.01) {

@@ -53,20 +53,27 @@ export class Mining extends Scene {
         
         this.cameras.main.setBackgroundColor(0x000000);
 
-        this.add.image(512, 384, 'mining').setAlpha(0.5);
+        this.add.image(SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2, 'mining').setAlpha(0.5);
 
         // Load saved progress from local storage
         this.loadProgress();
 
+        // Display the goal
+        this.goalText = this.add.text(SCREEN_WIDTH / 2, 20, 'Goal: 10000 Helium-3', {
+            fontFamily: "Pixelify Sans", fontSize: 24, color: '#ffffff',
+            stroke: '#000000', strokeThickness: 4,
+            align: 'center'
+        }).setOrigin(0.5);
+
         // Display the amount of helium-3
-        this.heliumText = this.add.text(SCREEN_WIDTH/2, SCREEN_HEIGHT/5, 'Helium-3: ' + this.helium + ' / ' + this.GetHeliumStorage(), {
+        this.heliumText = this.add.text(SCREEN_WIDTH/2, 70, 'Helium-3: ' + this.helium + ' / ' + this.GetHeliumStorage(), {
             fontFamily: "Pixelify Sans", fontSize: 38, color: '#ffffff',
             stroke: '#000000', strokeThickness: 4,
             align: 'center'
         }).setOrigin(0.5);
     
         // Add a button to mine helium-3
-        this.mineButton = this.add.text(SCREEN_WIDTH/2, SCREEN_HEIGHT/3, 'Mine', {
+        this.mineButton = this.add.text(SCREEN_WIDTH/2, 150, 'Mine', {
                 fontFamily: "Pixelify Sans", fontSize: 38, color: '#ffffff',
                 stroke: '#000000', strokeThickness: 4,
                 align: 'center'
@@ -197,7 +204,7 @@ export class Mining extends Scene {
                 const value = tween.getValue();
                 this.progressBarFill.clear();
                 this.progressBarFill.fillStyle(0xFFFFFF, 1); // Set color to black
-                this.progressBarFill.fillRect(SCREEN_WIDTH/2 - this.progressBarWidth/2, SCREEN_HEIGHT/3 + 40, this.progressBarWidth * (value / 100), this.progressBarHeight);
+                this.progressBarFill.fillRect(SCREEN_WIDTH/2 - this.progressBarWidth/2, 200, this.progressBarWidth * (value / 100), this.progressBarHeight);
             },
             onComplete: () => {
                 this.progressBarFill.clear();
@@ -411,7 +418,7 @@ export class Mining extends Scene {
     // Function to display the mining speed upgrade options
     DisplayMiningSpeedUpgrade() {
         // Create a container for the upgrade UI
-        this.upgradeContainers["miningSpeed"] = this.add.container(SCREEN_WIDTH/6, SCREEN_HEIGHT/2 - 60);
+        this.upgradeContainers["miningSpeed"] = this.add.container(SCREEN_WIDTH/6, SCREEN_HEIGHT/3);
 
         // Display upgrade name
         this.miningSpeedText = this.add.text(0, 0, 'Upgrade: Mining Speed', {

@@ -1,6 +1,9 @@
 import { Scene } from 'phaser';
 import WebFont from 'webfontloader';
 
+const SCREEN_WIDTH = 1024;
+const SCREEN_HEIGHT = 768;
+
 export class MainMenu extends Scene {
     constructor() {
         super('MainMenu');
@@ -22,7 +25,7 @@ export class MainMenu extends Scene {
                 urls: ['/style.css'] // Update this path to your actual font CSS file
             },
             active: () => {
-                this.add.image(512, 384, 'mining');
+                this.add.image(SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2, 'mining').setAlpha(0.5);
                 this.add.image(512, 380, 'logo');
 
                 this.add.text(512, 460, 'Play', {

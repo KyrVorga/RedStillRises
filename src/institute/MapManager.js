@@ -1,11 +1,13 @@
 import { Scene } from 'phaser';
 
 export class MapManager {
-    constructor(scene, mapData, tileSize) {
+    constructor(scene, mapData, tileSize, playerHouse) {
         this.playerManager;
         this.scene = scene;
         this.mapData = mapData;
         this.tileSize = tileSize;
+        this.playerHouse = playerHouse;
+
         this.fogTiles = [];
         this.scaleFactor = 1;
         this.zoomFactor = 1; // Add zoom factor
@@ -22,8 +24,8 @@ export class MapManager {
         this.playerManager = playerManager;
     }
 
-    async renderMap(house) {
-        const revealedTiles = new Set(house.revealedTiles);
+    async renderMap() {
+        const revealedTiles = new Set(this.playerHouse.revealedTiles);
     
         // Render revealed tiles
         revealedTiles.forEach((tile) => {
@@ -89,7 +91,9 @@ export class MapManager {
         });
     }
 
-    async rerenderMap(house) {
+    async rerenderMap() {
+        const time = Date.now();
+        console.log('Rerendering map at:' + time);
         this.tileSprites.forEach(sprite => sprite.destroy());
         this.fogTiles.forEach(fogTile => fogTile.sprite.destroy());
         this.tileIcons.forEach(icon => icon.destroy());
@@ -97,7 +101,8 @@ export class MapManager {
         this.fogTiles = [];
         this.tileIcons = [];
         this.calculateHexSize();
-        await this.renderMap(house);
+        await this.renderMap();
+        console.log('Rerendering completed in:' + (Date.now() - time) + 'ms');
     }
     
     checkActionValidity(house, source, dest) {
@@ -142,53 +147,103 @@ export class MapManager {
         return true;
     }
 
-    transferUnits(source, dest, units) {
+    async attackTile(attacker, defender, map) {
+        // Placeholder for map bonuses check
+        // Placeholder for unit upgrade check
+    
+        const nearbyOwnedTiles = calculateNearbyOwnedTiles(attacker, map);
+        const distanceFromCastle = calculateDistanceFromCastle(attacker, map);
+    
+        const attackerStrength = attacker.units + nearbyOwnedTiles - distanceFromCastle;
+        const defenderStrength = defender.units;
+    
+        let attackerWins = Math.random() * (attackerStrength + defenderStrength) < attackerStrength;
+    
+        if (attackerWins) {
+            let capturedUnits = Math.floor(Math.random() * defender.units);
+            let lostUnits = Math.floor(Math.random() * attacker.units / 2);
+    
+            defender.units -= capturedUnits;
+            attacker.units -= lostUnits;
+    
+            // Transfer captured units to attacker's castle
+            transferUnits(defender, attackerCastle, capturedUnits);
+    
+            // Transfer lost units to nearby castle for buy back
+            transferUnits(attacker, nearbyCastle, lostUnits);
+    
+            if (defender.units <= 0) {
+                // Attacker takes over the tile
+                defender.owner = attacker.owner;
+                defender.units = attacker.units;
+                attacker.units = 0;
+            }
+        } else {
+            let lostUnits = Math.floor(Math.random() * attacker.units);
+            attacker.units -= lostUnits;
+    
+            // Transfer lost units to nearby castle for buy back
+            transferUnits(attacker, nearbyCastle, lostUnits);
+        }
+    }
+    
+    calculateNearbyOwnedTiles(unit, map) {
+        // Implement logic to count nearby owned tiles
+        return 0; // Placeholder
+    }
+    
+    calculateDistanceFromCastle(unit, map) {
+        // Implement logic to calculate distance from the nearest castle or outpost
+        return 0; // Placeholder
+    }
+    
+    async transferUnits(source, dest, units) {
         // clamp units to the maximum available
         if (source.units < units) {
             units = source.units;
         }
         source.units -= units;
         dest.units += units;
-
+    
         if (source.units == 0) {
             return dest;
         }
         return source;
     }
 
-    moveUnits(house, source, dest, units) {
+    async moveUnits(house, source, dest, units) {
         if (!this.checkActionValidity(house, source, dest)) return;
-        this.handleTileReveal(house, source, dest);
-        let tile = this.transferUnits(source, dest, units);
-        this.rerenderMap(house);
+        await this.handleTileReveal(house, source, dest);
+        let tile = await this.transferUnits(source, dest, units);
+        await this.rerenderMap();
         
         return tile;
     }
 
-    moveOneUnit(house, source, dest) {
+    async moveOneUnit(house, source, dest) {
         if (!this.checkActionValidity(house, source, dest)) return;
-        this.handleTileReveal(house, source, dest);
-        let tile = this.transferUnits(source, dest, 1);
-        this.rerenderMap(house);
+        await this.handleTileReveal(house, source, dest);
+        let tile = await this.transferUnits(source, dest, 1);
+        await this.rerenderMap();
         
         return tile;
     }
 
-    moveHalfUnits(house, source, dest) {
+    async moveHalfUnits(house, source, dest) {
         if (!this.checkActionValidity(house, source, dest)) return;
         const unitsToMove = Math.floor(source.units / 2);
-        this.handleTileReveal(house, source, dest);
-        let tile = this.transferUnits(source, dest, unitsToMove);
-        this.rerenderMap(house);
+        await this.handleTileReveal(house, source, dest);
+        let tile = await this.transferUnits(source, dest, unitsToMove);
+        await this.rerenderMap();
         
         return tile;
     }
 
-    moveAllUnits(house, source, dest) {
+    async moveAllUnits(house, source, dest) {
         if (!this.checkActionValidity(house, source, dest)) return;
-        this.handleTileReveal(house, source, dest);
-        let tile = this.transferUnits(source, dest, source.units);
-        this.rerenderMap(house);
+        await this.handleTileReveal(house, source, dest);
+        let tile = await this.transferUnits(source, dest, source.units);
+        await this.rerenderMap();
         
         return tile;
     }
@@ -250,11 +305,11 @@ export class MapManager {
         return adjacentTiles.some(tile => tile.q === tileB.q && tile.r === tileB.r);
     }
 
-    handleTileReveal(house, source, dest) {
+    async handleTileReveal(house, source, dest) {
         if (dest.house !== source.house && dest.units == 0) {
             dest.house = source.house;
             dest.border = source.border;
-            this.revealAdjacentTiles(house, dest.q, dest.r);
+            await this.revealAdjacentTiles(house, dest.q, dest.r);
 
             return true;
         }
@@ -263,7 +318,7 @@ export class MapManager {
 
     showTileDetails(tile) {
         // Placeholder for showing tile details in the info panel
-        // console.log('Showing details for tile:', tile);
+        console.log('Showing details for tile:', tile);
     }
 
     isOwnedByHouse(tile, house) {
@@ -297,7 +352,7 @@ export class MapManager {
         return directions.map(dir => ({ q: q + dir.dq, r: r + dir.dr }));
     }
 
-    revealTile(house, q, r) {
+    async revealTile(house, q, r) {
         const tile = this.mapData.find(tile => tile.q === q && tile.r === r);
         if (!tile) return;
 
@@ -306,12 +361,12 @@ export class MapManager {
         }
     }
     
-    revealAdjacentTiles(house, q, r) {
+    async revealAdjacentTiles(house, q, r) {
         const adjacentTiles = this.getAdjacentTiles(q, r);
         
-        adjacentTiles.forEach(tile => {
-            this.revealTile(house, tile.q, tile.r);
-        });
+        for (const tile of adjacentTiles) {
+            await this.revealTile(house, tile.q, tile.r);
+        }
     }
     
     revealHouseTiles(houses) {
@@ -330,7 +385,7 @@ export class MapManager {
         this.mapData.forEach(tile => {
             house.revealedTiles.push(tile);
         });
-        this.rerenderMap(house);
+        this.rerenderMap();
     }
 
     getCastleTiles() {

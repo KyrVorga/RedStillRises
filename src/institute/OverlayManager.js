@@ -21,4 +21,34 @@ export class OverlayManager {
 
         return overlay;
     }
+    
+    
+    createEndTurnButton(callback) {
+        const viewportWidth = this.scene.cameras.main.width;
+        const marginRight = 10;
+        const marginTop = 0;
+        const buttonWidth = 100;
+        const buttonHeight = 40;
+    
+        // Create the button text
+        const buttonText = this.scene.add.text(
+            viewportWidth - buttonWidth / 2 - marginRight,
+            buttonHeight / 2 + marginTop,
+            'End Turn', 
+            { fill: '#00cd0d', fontSize: '20px' }
+        ).setOrigin(0.5)
+        .setScrollFactor(0)
+        .setDepth(1001)
+        .setInteractive({ useHandCursor: true })
+        .on('pointerdown', () => {
+            console.log('Button clicked');
+            callback();
+        })
+        .on('pointerover', () => buttonText.setStyle({ fill: '#0f0' }))
+        .on('pointerout', () => buttonText.setStyle({ fill: '#00cd0d' }))
+    
+        this.scene.input.setTopOnly(true); // Make sure only the topmost object gets the click
+
+        return buttonText;
+    }
 }

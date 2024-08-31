@@ -42,6 +42,7 @@ export class AIManager {
             if (decision) {
                 try {
                     await this.actionManager.executeDecision(decision);
+                    await delay(25);
                 } catch (error) {
                     failedAttempts++;
                 }
@@ -91,4 +92,8 @@ export class AIManager {
         // console.log(`${this.currentHouse.name}'s turn ended.`);
         this.currentHouse = null;
     }
+}
+
+function delay(ms) {
+    return new Promise(resolve => setTimeout(resolve, ms));
 }

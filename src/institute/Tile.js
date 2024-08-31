@@ -6,6 +6,58 @@ export class Tile {
         this.isOutpost = isOutpost;
         this.isCastle = isCastle;
         this.units = 0;
+        // Initialize resources and bonuses
+        this.wood = 0;
+        this.stone = 0;
+        this.food = 0;
+        this.defenseBonus = 0;
+        this.movementPenalty = 1;
+
+        this.initializeResourcesAndBonuses();
+    }
+
+    initializeResourcesAndBonuses() {
+        switch (this.biome) {
+            case 'forest':
+                this.wood = this.randomInRange(5, 15);
+                break;
+            case 'tundra':
+                this.wood = this.randomInRange(5, 10);
+                this.food = this.randomInRange(5, 10);
+                break;
+            case 'greatwood':
+                this.wood = this.randomInRange(5, 15);
+                this.movementPenalty = 1.5;
+                break;
+            case 'hill':
+                this.stone = this.randomInRange(5, 15);
+                break;
+            case 'mountain':
+                this.stone = this.randomInRange(10, 25);
+                this.movementPenalty = 1.5;
+                break;
+            case 'grassland':
+                this.food = this.randomInRange(5, 15);
+                break;
+            case 'farmland':
+                this.food = this.randomInRange(10, 25);
+                break;
+            case 'swamp':
+                this.movementPenalty = 1.5;
+                break;
+        }
+
+        if (this.isOutpost) {
+            this.defenseBonus = 0.1;
+        }
+
+        if (this.isCastle) {
+            this.defenseBonus = 0.2;
+        }
+    }
+
+    randomInRange(min, max) {
+        return Math.floor(Math.random() * (max - min + 1)) + min;
     }
     
     static determineBiome(noiseValue) {

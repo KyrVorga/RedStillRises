@@ -189,7 +189,7 @@ export class Institute extends Scene {
         this.load.svg('outpost_5_small', "assets/icons/outpost/outpost_5.svg", { width: smallIconWidth, height: smallIconHeight });
     }
 
-    create() {
+    async create() {
         this.cameras.main.setBackgroundColor(0x000000);
 
         // Add background image and set it to follow the camera
@@ -200,10 +200,10 @@ export class Institute extends Scene {
         background.setScale(0.75);
 
         const houses = House.instantiateHouses();
-
-        this.mapManager = new MapManager(this, this.mapData, this.tileSize);
-        this.mapManager.revealHouseTiles(houses);
         this.playerHouse = houses.find((house) => house.name.toLowerCase() === this.house);
+
+        this.mapManager = new MapManager(this, this.mapData, this.tileSize, this.playerHouse);
+        await this.mapManager.revealHouseTiles(houses);
 
         this.aiHouses = houses.filter((house) => house.name.toLowerCase() !== this.house);
 
@@ -223,60 +223,8 @@ export class Institute extends Scene {
         this.cameraController.initializeCamera(x, y, 1);
         this.cameraController.enablePanning();
 
-        // Tooltip setup
-        this.tooltip = new Tooltip(this, 0, 0, '');
-        this.hoveredTile = null;
-        this.hoverStartTime = 0;
-        this.hoveredPosition = { x: 0, y: 0 };
-        this.hoverTimer = null;
-
-        this.input.on('pointermove', (pointer) => {
-            const tile = this.mapManager.getTileAt(pointer.worldX, pointer.worldY);
-            if (tile !== this.hoveredTile) {
-                this.hoveredTile = tile;
-                this.hoverStartTime = this.time.now;
-                this.hoveredPosition = { x: pointer.worldX, y: pointer.worldY };
-                this.tooltip.hide();
-
-                // Clear any existing timer
-                if (this.hoverTimer) {
-                    this.hoverTimer.remove(false);
-                }
-
-                // Start a new timer for the remaining time
-                this.hoverTimer = this.time.delayedCall(1500, () => {
-                    if (this.hoveredTile && pointer.worldX === this.hoveredPosition.x && pointer.worldY === this.hoveredPosition.y) {
-                        this.tooltip.show(pointer.worldX, pointer.worldY, `Tile: ${tile.q}, ${tile.r}`);
-                    }
-                });
-            // } else if (this.hoveredTile && this.time.now - this.hoverStartTime > 1500) {
-            //     this.tooltip.show(pointer.worldX, pointer.worldY, `Tile: ${tile.q}, ${tile.r}`);
-            }
-        });
-
-        this.input.on('pointerout', () => {
-            this.tooltip.hide();
-            this.hoveredTile = null;
-
-            // Clear the timer when the cursor leaves the tile
-            if (this.hoverTimer) {
-                this.hoverTimer.remove(false);
-            }
-        });
-        // Timer event to check hover state
-        // this.time.addEvent({
-        //     delay: 100, // Check every 100ms
-        //     callback: () => {
-        //         if (this.hoveredTile && this.time.now - this.hoverStartTime > 1500) {
-        //             const pointer = this.input.activePointer;
-        //             this.tooltip.show(pointer.worldX, pointer.worldY, `Tile: ${this.hoveredTile.q}, ${this.hoveredTile.r}`);
-        //         }
-        //     },
-        //     loop: true
-        // });
-
-        this.mapManager.revealAllTiles(this.playerHouse);
-        this.mapManager.renderMap(this.playerHouse);
+        // this.mapManager.revealAllTiles(this.playerHouse);
+        await this.mapManager.renderMap(this.playerHouse);
         this.turnManager.startGame();
     }
 }

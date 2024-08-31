@@ -258,6 +258,7 @@ export class Carving extends Scene
     }
 
     showCurrentDialogue() {
+        this.pointerdownListener.destroy();
         if (this.currentDialogueIndex >= dialogues.length) {
             return;
         }
