@@ -46,6 +46,7 @@ class PathFinder {
     }
 
     async findPath(fromTile, toTile) {
+        if (!fromTile || !toTile) return null;
         const openSet = new PriorityQueue();
         const cameFrom = new Map();
         const gScore = new Map();

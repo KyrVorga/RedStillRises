@@ -474,6 +474,7 @@ export class MapManager {
 
     
     calculateActionCost(house, source, dest, units, actionType) {
+        console.log(source, dest);
         let cost = 1; // Base cost
 
         if (actionType === 'split') {

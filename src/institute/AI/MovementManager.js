@@ -25,8 +25,12 @@ export class MovementManager {
 
     async followPath(path, units) {
         // Get the source tile and the next tile in the path
+        if (!path || path.length < 2) {
+            return;
+        }
         const fromTile = path[0];
         const toTile = path[1];
+        console.log("Path:", path);
 
         const currentHouse = this.aiManager.getCurrentHouse();
 
