@@ -3,6 +3,7 @@ export class Tile {
         this.q = q;
         this.r = r;
         this.biome = biome;
+        this.icon = null;
         this.isOutpost = isOutpost;
         this.isCastle = isCastle;
         this.units = 0;
@@ -91,5 +92,38 @@ export class Tile {
         } else {
             return 'greatwood'; 
         }
+    }
+
+    serialize() {
+        return {
+            q: this.q,
+            r: this.r,
+            biome: this.biome,
+            border: this.border,
+            house: this.house,
+            icon: this.icon,
+            isOutpost: this.isOutpost,
+            isCastle: this.isCastle,
+            units: this.units,
+            wood: this.wood,
+            stone: this.stone,
+            food: this.food,
+            defenseBonus: this.defenseBonus,
+            movementPenalty: this.movementPenalty
+        };
+    }
+
+    static deserialize(data) {
+        const tile = new Tile(data.q, data.r, data.biome, null, null, data.isOutpost, data.isCastle);
+        tile.icon = data.icon;
+        tile.units = data.units;
+        tile.wood = data.wood;
+        tile.stone = data.stone;
+        tile.food = data.food;
+        tile.defenseBonus = data.defenseBonus;
+        tile.movementPenalty = data.movementPenalty;
+        tile.house = data.house;
+        tile.border = data.border;
+        return tile;
     }
 }

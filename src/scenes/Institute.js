@@ -8,21 +8,17 @@ import { PlayerManager } from '../institute/PlayerManager';
 import { AIManager } from '../institute/AIManager';
 import { TurnManager } from '../institute/TurnManager';
 import { House } from '../institute/House';
+import { Tile } from '../institute/Tile';
 
 export class Institute extends Scene {
     constructor() {
         super('Institute');
     }
 
-    init(data) {
-        this.house = data.house;
-        this.name = data.name;
+    init() {
         this.tileSize = 96;
-        this.sideLength = 30;
+        this.sideLength = 20;
         this.margin = 100;
-
-        this.mapGenerator = new MapGenerator(this.tileSize, this.sideLength);
-        this.mapData = this.mapGenerator.generateMapData();
     }
 
     preload() {
@@ -58,8 +54,11 @@ export class Institute extends Scene {
         
         this.load.svg('fog', 'assets/tiles/Fog.svg', { width: this.tileSize, height: this.tileSize });
 
-        this.load.svg('eye', 'assets/eye.svg', { width: 32, height: 32 });
-        this.load.svg('eye-off', 'assets/eye-off.svg', { width: 32, height: 32 });
+        this.load.svg('eye', 'assets/icons/eye.svg', { width: 32, height: 32 });
+        this.load.svg('eye-off', 'assets/icons/eye-off.svg', { width: 32, height: 32 });
+        this.load.svg('info', 'assets/icons/info.svg', { width: 32, height: 32 });
+        this.load.svg('help', 'assets/icons/help.svg', { width: 32, height: 32 });
+        this.load.svg('close', 'assets/icons/close.svg', { width: 32, height: 32 });
 
         this.load.svg('apollo_border', 'assets/tiles/ApolloBorder.svg', { width: this.tileSize, height: this.tileSize });
         this.load.svg('bacchus_border', 'assets/tiles/BacchusBorder.svg', { width: this.tileSize, height: this.tileSize });
@@ -218,32 +217,126 @@ export class Institute extends Scene {
         background.setDepth(-1); 
         background.setScale(0.75);
 
-        const houses = House.instantiateHouses();
-        this.playerHouse = houses.find((house) => house.name.toLowerCase() === this.house);
+        this.loadProgress();
 
-        this.mapManager = new MapManager(this, this.mapData, this.tileSize, this.playerHouse);
-        await this.mapManager.revealHouseTiles(houses);
-
-        this.aiHouses = houses.filter((house) => house.name.toLowerCase() !== this.house);
+        this.mapManager = new MapManager(this, this.mapData, this.tileSize, this.playerHouse, this.houses);
+        await this.mapManager.revealHouseTiles(this.houses);
 
         this.playerManager = new PlayerManager(this, this.mapManager, this.playerHouse);
         this.mapManager.setPlayerManager(this.playerManager);
         
-        this.aiManager = new AIManager(this, this.mapManager, this.aiHouses);
-        this.turnManager = new TurnManager(this, this.playerManager, this.aiManager, this.mapManager, this.playerHouse.name);
+        this.aiManager = new AIManager(this, this.mapManager, this.aiHouses, this.mapData);
+        this.turnManager = new TurnManager(this, this.playerManager, this.aiManager, this.mapManager, this.playerHouse.name, this.turnOrder, this.turnIndex);
 
         this.playerManager.setTurnManager(this.turnManager);
         this.aiManager.setTurnManager(this.turnManager);
 
-        const playerHouseTile = this.playerHouse.revealedTiles.find((tile) => tile.icon === this.playerHouse.name.toLowerCase());
+        const playerHouseTile = this.mapData.find(tile => tile.icon === this.playerHouse.name.toLowerCase());
         let {x, y} = this.mapManager.getTileCoordinates(playerHouseTile.q, playerHouseTile.r);
 
         this.cameraController = new CameraController(this);
         this.cameraController.initializeCamera(x, y, 1);
         this.cameraController.enablePanning();
 
-        // this.mapManager.revealAllTiles(this.playerHouse);
+        this.mapManager.revealAllTiles(this.playerHouse);
         await this.mapManager.renderMap(this.playerHouse);
         this.turnManager.startGame();
+    }
+
+    loadProgress() {
+        const gameState = localStorage.getItem('gameState');
+        this.name = localStorage.getItem('playerName');
+        this.house = localStorage.getItem('playerHouse');
+
+        if (gameState) {
+            const { mapData, houses, turnOrder, turnIndex } = JSON.parse(gameState);
+            this.mapData = mapData.map(tile => Tile.deserialize(tile));
+            this.houses = houses.map(house => House.deserialize(house));
+            
+            this.turnOrder = turnOrder;
+            this.turnIndex = turnIndex;
+            
+            this.playerHouse = this.houses.find((house) => house.name.toLowerCase() === this.house);
+            this.aiHouses = this.houses.filter((house) => house.name.toLowerCase() !== this.house);
+        } else {
+            this.mapGenerator = new MapGenerator(this.tileSize, this.sideLength);
+            this.mapData = this.mapGenerator.generateMapData();
+            
+
+            this.houses = House.instantiateHouses();
+            this.playerHouse = this.houses.find((house) => house.name.toLowerCase() === this.house);
+            
+            this.aiHouses = this.houses.filter((house) => house.name.toLowerCase() !== this.house);
+        }
+    }
+
+    saveProgress() {
+        const gameState = {
+            mapData: this.mapManager.getMapData(),
+            houses: this.houses,
+            turnOrder: this.turnManager.getTurnOrder(),
+            turnIndex: this.turnManager.getCurrentTurnIndex(),
+        };
+        localStorage.setItem('gameState', JSON.stringify(gameState));
+    }
+
+     checkWinLoseConditions() {
+        // Check lose condition: player loses all units
+        if (this.playerHouse.getTotalUnits() === 0) {
+            this.endGame('lose', 'Your house has been eliminated.');
+            return;
+        }
+    
+        // Check win condition: player has 650 units
+        if (this.playerHouse.getTotalUnits() >= 650) {
+            this.endGame('win', 'You have eliminated all other houses.');
+            return;
+        }
+    
+        // Check win condition for all houses
+        for (let house of this.houses) {
+            const houseHoldsAllCastles = house.getTotalCastles() === 13; // Assuming castles is an array of castles held by the house
+            if (houseHoldsAllCastles) {
+                house.turnsHoldingCastles++;
+                if (house.turnsHoldingCastles >= 5) {
+                    if (house === this.playerHouse) {
+                        this.endGame('win', 'You have held all 13 castles for 5 turns in a row.');
+                    } else {
+                        this.endGame('lose', `House ${house.name} has held all 13 castles for 5 turns in a row.`);
+                        this.aiManager.removeHouse(house); // Assuming aiManager has a method to remove a house
+                    }
+                    return;
+                }
+            } else {
+                house.turnsHoldingCastles = 0;
+            }
+        }
+    }
+
+    getHouse(houseName) {
+        return this.houses.find(house => house.name.toLowerCase() === houseName.toLowerCase());
+    }
+    
+    endGame(result, reason) {
+        if (result === 'win') {
+            alert(`Congratulations! You have won the game! Reason: ${reason}`);
+        } else if (result === 'lose') {
+            alert(`Game Over! You have lost the game. Reason: ${reason}`);
+        }
+    
+        localStorage.removeItem('gameState');
+        localStorage.removeItem('playerName');
+        localStorage.removeItem('playerHouse');
+    
+        localStorage.setItem('currentScene', 'CarvingQuestions');
+    
+        this.scene.start('MainMenu');
+    }
+
+    displayMessage(message) {
+        this.playerManager.overlayManager.displayMessage(message);
+    }
+    updateTurnText(houseName) {
+        this.playerManager.overlayManager.updateTurnText(houseName);
     }
 }

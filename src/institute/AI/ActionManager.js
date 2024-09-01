@@ -4,19 +4,76 @@ export class ActionManager {
         this.movementManager = movementManager;
     }
 
-    async executeDecision(decision) {
-        switch (decision.type) {
-            case 'Random Roaming':
-                await this.randomRoaming(decision.targetTile);
-                break;
-            default:
-                break;
+    async executeDecision(decisions) {
+        for (const decision of decisions) {
+            console.log(decision);
+            switch (decision.type) {
+                case 'Retreat':
+                    await this.retreat(decision.tile, decision.targetTile);
+                    break;
+                case 'Attack':
+                    await this.attack(decision.tile, decision.targetTile);
+                    break;
+                case 'Defend':
+                    await this.defend(decision.tile, decision.targetTile);
+                    break;
+                case 'Explore':
+                    await this.explore(decision.tile, decision.targetTile);
+                    break;
+                case 'Take Castle':
+                    await this.takeCastle(decision.tile, decision.targetTile);
+                    break;
+                case 'Random Roaming':
+                    await this.randomRoaming(decision.targetTile);
+                    break;
+                default:
+                    break;
+            }
         }
     }
 
+    async retreat(unit, targetTile) {
+        console.log('Retreating: ' + targetTile, "from: ", unit);
+        const path = await this.movementManager.findPath(unit, targetTile);
+        const actionCost = await this.movementManager.followPath(path, unit.units);
+        this.aiManager.currentHouse.performAction(actionCost);
+    }
+
+    async attack(unit, targetTile) {
+        console.log('Attacking: ' + targetTile, "from: ", unit);
+
+        const path = await this.movementManager.findPath(unit, targetTile);
+        const actionCost = await this.movementManager.followPath(path, unit.units);
+        this.aiManager.currentHouse.performAction(actionCost);
+    }
+
+    async defend(unit, targetTile) {
+        console.log('Defending: ' + targetTile, "from: ", unit);
+        const path = await this.movementManager.findPath(unit, targetTile);
+        const actionCost = await this.movementManager.followPath(path, unit.units);
+        this.aiManager.currentHouse.performAction(actionCost);
+    }
+
+    async explore(unit, targetTile) {
+        console.log('Exploring: ' + targetTile, "from: ", unit);
+        const path = await this.movementManager.findPath(unit, targetTile);
+        console.log(path);
+        const actionCost = await this.movementManager.followPath(path, unit.units);
+        console.log(actionCost);
+        this.aiManager.currentHouse.performAction(actionCost);
+    }
+
+    async takeCastle(unit, targetTile) {
+        console.log('Taking Castle: ' + targetTile, "from: ", unit);
+        const path = await this.movementManager.findPath(unit, targetTile);
+        const actionCost = await this.movementManager.followPath(path, unit.units);
+        this.aiManager.currentHouse.performAction(actionCost);
+    }
+
     async randomRoaming(targetTile) {
+        console.log('Random Roaming: ' + targetTile);
         // Get all of the houses units
-        const tilesWithUnits = this.aiManager.getTilesWithUnits();
+        const tilesWithUnits = await this.aiManager.getTilesWithUnits();
     
         // Find any groups of units larger than 15
         const largeGroups = tilesWithUnits.filter(tile => tile.units > 15);

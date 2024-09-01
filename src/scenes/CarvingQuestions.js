@@ -330,7 +330,15 @@ export class CarvingQuestions extends Scene {
     finishQuestions() {
         const house = this.determineHouse();
         const name = this.answers['name'];
-        this.scene.start('Institute', { house, name });
+
+        localStorage.removeItem('currentQuestionIndex');
+        localStorage.removeItem('answers');
+
+        localStorage.setItem('playerHouse', house);
+        localStorage.setItem('playerName', name);
+        localStorage.setItem('currentScene', 'Institute');
+
+        this.scene.start('Institute');
     }
 
     determineHouse() {
