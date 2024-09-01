@@ -3,10 +3,12 @@ import { ActionManager } from './AI/ActionManager.js';
 import { MovementManager } from './AI/MovementManager.js';
 
 export class AIManager {
-    constructor(scene, mapManager, houses) {
+    constructor(scene, mapManager, houses, mapData) {
         this.scene = scene;
         this.mapManager = mapManager;
         this.houses = houses;
+        this.mapData = mapData;
+
         this.houseNames = houses.map(house => house.name);
         this.currentHouse = null;
         this.turnManager = null;
@@ -29,6 +31,13 @@ export class AIManager {
     async takeTurn(houseName) {
         const house = this.houses.find(house => house.name === houseName);
         this.currentHouse = house;
+
+        // Check if the house is eliminated
+        if (this.isEliminated(house)) {
+            console.log(`${houseName} has been eliminated and will not take a turn.`);
+            return;
+        }
+
         let actionPoints = house.actionPoints;
         let failedAttempts = 0;
 
@@ -59,7 +68,9 @@ export class AIManager {
     }
 
     getVisibleTiles() {
-        return this.currentHouse.revealedTiles;
+        // Filter this.mapData to only include tiles that are revealed for the current house
+        // currentHouse.revealedTiles is an array of objects with a q and r property
+        return this.mapData.filter(tile => this.currentHouse.revealedTiles.some(revealedTile => revealedTile.q === tile.q && revealedTile.r === tile.r));
     }
 
     getTilesWithUnits() {
@@ -89,6 +100,10 @@ export class AIManager {
     endTurn() {
         this.currentHouse.resetActionPoints();
         this.currentHouse = null;
+    }
+
+    isEliminated(house) {
+        return house.units <= 0;
     }
 }
 

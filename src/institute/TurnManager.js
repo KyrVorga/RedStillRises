@@ -52,6 +52,11 @@ export class TurnManager {
             await this.aiManager.notifyTurn(currentHouse);
         }
         this.currentTurnIndex = (this.currentTurnIndex + 1) % this.turnOrder.length;
+
+        const house = this.scene.getHouse(currentHouse);
+        const resources = await house.calculateResourceIncome()
+        console.log(resources);
+        await this.scene.checkWinLoseConditions();
     }
 
     async startGame() {

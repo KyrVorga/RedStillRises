@@ -29,48 +29,48 @@ export class OverlayManager {
         .setDepth(1001);
     
         // Add text to display player's resources
-        this.foodText = this.scene.add.text(viewportWidth / 5, viewportHeight - this.margin / 2, "Food: 0", {
-            fontSize: '18px',
-            fill: '#ffffff'
-        }).setOrigin(0.5)
-        .setScrollFactor(0)
-        .setDepth(1001);
+        // this.foodText = this.scene.add.text(viewportWidth / 7, viewportHeight - this.margin / 2, "Food: 0", {
+        //     fontSize: '18px',
+        //     fill: '#ffffff'
+        // }).setOrigin(0.5)
+        // .setScrollFactor(0)
+        // .setDepth(1001);
     
-        this.woodText = this.scene.add.text(2 * viewportWidth / 5, viewportHeight - this.margin / 2, "Wood: 0", {
-            fontSize: '18px',
-            fill: '#ffffff'
-        }).setOrigin(0.5)
-        .setScrollFactor(0)
-        .setDepth(1001);
+        // this.woodText = this.scene.add.text(2 * viewportWidth / 7, viewportHeight - this.margin / 2, "Wood: 0", {
+        //     fontSize: '18px',
+        //     fill: '#ffffff'
+        // }).setOrigin(0.5)
+        // .setScrollFactor(0)
+        // .setDepth(1001);
     
-        this.stoneText = this.scene.add.text(3 * viewportWidth / 5, viewportHeight - this.margin / 2, "Stone: 0", {
-            fontSize: '18px',
-            fill: '#ffffff'
-        }).setOrigin(0.5)
-        .setScrollFactor(0)
-        .setDepth(1001);
+        // this.stoneText = this.scene.add.text(3 * viewportWidth / 7, viewportHeight - this.margin / 2, "Stone: 0", {
+        //     fontSize: '18px',
+        //     fill: '#ffffff'
+        // }).setOrigin(0.5)
+        // .setScrollFactor(0)
+        // .setDepth(1001);
     
         // Add text to display player's action points
-        this.actionPointsText = this.scene.add.text(4 * viewportWidth / 5, viewportHeight - this.margin / 2, "Action Points: 0", {
+        this.actionPointsText = this.scene.add.text(4 * viewportWidth / 6, viewportHeight - this.margin / 2, "Action Points: 0", {
             fontSize: '18px',
             fill: '#ffffff'
         }).setOrigin(0.5)
         .setScrollFactor(0)
         .setDepth(1001);
     
-        // Add an "Upgrades" button at the bottom right corner
-        this.upgradesButton = this.scene.add.text(viewportWidth - this.margin / 2, viewportHeight - this.margin / 2, "Upgrades", {
-            fontSize: '18px',
-            fill: '#ffffff',
-            backgroundColor: '#000000'
-        }).setOrigin(1, 0.5)
-        .setScrollFactor(0)
-        .setDepth(1001)
-        .setInteractive({ useHandCursor: true });
+        // // Add an "Upgrades" button at the bottom right corner
+        // this.upgradesButton = this.scene.add.text(viewportWidth - this.margin / 2, viewportHeight - this.margin / 2, "Upgrades", {
+        //     fontSize: '18px',
+        //     fill: '#ffffff',
+        //     backgroundColor: '#000000'
+        // }).setOrigin(1, 0.5)
+        // .setScrollFactor(0)
+        // .setDepth(1001)
+        // .setInteractive({ useHandCursor: true });
     
         // Add a small chatbox at the bottom left corner above the overlay
-        this.chatBox = this.scene.add.text(this.margin / 2, viewportHeight - this.margin - 50, "System Messages", {
-            fontSize: '14px',
+        this.chatBox = this.scene.add.text(this.margin, viewportHeight - this.margin, "System Messages", {
+            fontSize: '24px',
             fill: '#ffffff',
             backgroundColor: '#000000',
             padding: { x: 10, y: 5 },
@@ -109,14 +109,18 @@ export class OverlayManager {
     }    
 
     displayMessage(message) {
+        this.chatBox.setVisible(true);
         this.chatBox.setText(message);
+        setTimeout(() => {
+            this.chatBox.setVisible(false);
+        }, 5000);
     }
 
     updateResources(food, wood, stone, actionPoints) {
-        this.foodText.setText(`Food: ${food}`);
-        this.woodText.setText(`Wood: ${wood}`);
-        this.stoneText.setText(`Stone: ${stone}`);
-        this.actionPointsText.setText(`Action Points: ${actionPoints}`);
+        // this.foodText.setText(`Food: ${food}`);
+        // this.woodText.setText(`Wood: ${wood}`);
+        // this.stoneText.setText(`Stone: ${stone}`);
+        // this.actionPointsText.setText(`Action Points: ${actionPoints}`);
     }
 
     updateTurnText(text) {
@@ -204,39 +208,39 @@ export class OverlayManager {
     }
 
     createToggleViewButton(callback) {
-        const viewportWidth = this.scene.cameras.main.width;
-        const marginRight = 0;
-        const marginTop = 50; // Adjust as needed
-        const buttonSize = 40;
+        // const viewportWidth = this.scene.cameras.main.width;
+        // const marginRight = 0;
+        // const marginTop = 50; // Adjust as needed
+        // const buttonSize = 40;
 
-        // Create the eye icon
-        const buttonIcon = this.scene.add.image(
-            viewportWidth - buttonSize / 2 - marginRight,
-            buttonSize / 2 + marginTop,
-            'eye', 
-            { fill: '#00cd0d' }
-        ).setOrigin(0.5)
-        .setScrollFactor(0)
-        .setDepth(1002) // Ensure the icon is above the background
-        .setInteractive({ useHandCursor: true });
+        // // Create the eye icon
+        // const buttonIcon = this.scene.add.image(
+        //     viewportWidth - buttonSize / 2 - marginRight,
+        //     buttonSize / 2 + marginTop,
+        //     'eye', 
+        //     { fill: '#00cd0d' }
+        // ).setOrigin(0.5)
+        // .setScrollFactor(0)
+        // .setDepth(1002) // Ensure the icon is above the background
+        // .setInteractive({ useHandCursor: true });
 
-        // Add click event to toggle view and switch icons
-        buttonIcon.on('pointerdown', () => {
-            console.log('Toggle button clicked');
-            callback(this.mode);
+        // // Add click event to toggle view and switch icons
+        // buttonIcon.on('pointerdown', () => {
+        //     console.log('Toggle button clicked');
+        //     callback(this.mode);
 
-            // Switch icons
-            const currentTexture = buttonIcon.texture.key;
-            const newTexture = currentTexture === 'eye' ? 'eye-off' : 'eye';
-            buttonIcon.setTexture(newTexture);
-        });
+        //     // Switch icons
+        //     const currentTexture = buttonIcon.texture.key;
+        //     const newTexture = currentTexture === 'eye' ? 'eye-off' : 'eye';
+        //     buttonIcon.setTexture(newTexture);
+        // });
 
-        if (this.mode === 'default') {
-            this.mode = 'resource';
-        } else {
-            this.mode = 'default';
-        }
+        // if (this.mode === 'default') {
+        //     this.mode = 'resource';
+        // } else {
+        //     this.mode = 'default';
+        // }
 
-        return buttonIcon;
+        // return buttonIcon;
     }
 }
