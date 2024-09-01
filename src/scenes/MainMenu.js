@@ -46,6 +46,12 @@ export class MainMenu extends Scene {
                             case 'Carving':
                                 this.scene.start('Carving');
                                 break;
+                            case 'CarvingQuestions':
+                                this.scene.start('CarvingQuestions');
+                                break;
+                            case 'Institute':
+                                this.scene.start('Institute');
+                                break;
                             default:
                                 break;
                         }

@@ -238,7 +238,7 @@ export class Mining extends Scene {
                     this.DisplayMiningEfficiencyUpgrade();
                 }
 
-                if (this.helium >= this.additionalMinerCosts[0] && !this.isAddtionalMinerUpgradeEnabled) {
+                if (this.helium >= this.additionalMinerCosts[1] && !this.isAddtionalMinerUpgradeEnabled) {
                     this.isAddtionalMinerUpgradeEnabled = true;
                     this.DisplayAdditionalMinerUpgrade();
                 }

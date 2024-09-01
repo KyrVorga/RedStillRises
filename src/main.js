@@ -3,6 +3,7 @@ import { Laurel } from './scenes/Laurel';
 import { MainMenu } from './scenes/MainMenu';
 import { Preloader } from './scenes/Preloader';
 import { Mining } from './scenes/Mining';
+import { CarvingQuestions } from './scenes/CarvingQuestions';
 import { Carving } from './scenes/Carving';
 import { Institute } from './scenes/Institute';
 
@@ -23,6 +24,7 @@ const config = {
         Preloader,
         MainMenu,
         Mining,
+        CarvingQuestions,
         Carving,
         Laurel,
         Institute
