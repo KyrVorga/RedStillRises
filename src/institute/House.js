@@ -1,11 +1,12 @@
+import { Tile } from './Tile.js';
+
 export class House {
-    constructor(name, units = 50, resources = {}) {
+    constructor(name, units = 50, resources = { food: 0, wood: 0, stone: 0}, actionPoints = 5, revealedTiles = []) {
         this.name = name;
         this.units = units;
         this.resources = resources;
-        this.turn = 0;
-        this.actionPoints = 0;
-        this.revealedTiles = [];
+        this.actionPoints = actionPoints;
+        this.revealedTiles = revealedTiles;
     }
 
     addUnits(units) {
@@ -59,5 +60,25 @@ export class House {
             new House("Venus"),
             new House("Vulcan"),
         ];
+    }
+
+    serialize() {
+        return {
+            name: this.name,
+            units: this.units,
+            resources: this.resources,
+            actionPoints: this.actionPoints,
+            revealedTiles: this.revealedTiles.map(tile => tile.serialize()),
+        };
+    }
+
+    static deserialize(data) {
+        return new House(
+            data.name,
+            data.units,
+            data.resources,
+            data.actionPoints,
+            data.revealedTiles
+        );
     }
 }

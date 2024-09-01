@@ -18,8 +18,6 @@ export class AIManager {
 
     async notifyTurn(houseName) {
         if (this.houseNames.includes(houseName)) {
-            const house = this.houses.find(house => house.name === houseName);
-            house.resetActionPoints();
             await this.takeTurn(houseName);
         }
     }
@@ -89,7 +87,7 @@ export class AIManager {
     }
 
     endTurn() {
-        // console.log(`${this.currentHouse.name}'s turn ended.`);
+        this.currentHouse.resetActionPoints();
         this.currentHouse = null;
     }
 }

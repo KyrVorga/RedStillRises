@@ -29,8 +29,8 @@ export class PlayerManager {
 
     async notifyTurn(house) {
         if (house === this.house.name) {
-            this.house.resetActionPoints();
-            await this.mapManager.rerenderMap(this.house);
+            await this.mapManager.rerenderMap();
+            this.overlayManager.updateResources(this.house.resources.food, this.house.resources.wood, this.house.resources.stone, this.house.actionPoints);
             this.unlockControls();
 
             // Create the "End Turn" button
@@ -48,7 +48,6 @@ export class PlayerManager {
     
     
     endTurn() {
-        console.log('Ending turn');
         if (this.endTurnButton) {
             this.endTurnButton.destroy();
             this.endTurnButton = null;
@@ -58,6 +57,8 @@ export class PlayerManager {
             this.endTurnResolve();
             this.endTurnResolve = null;
         }
+        this.house.resetActionPoints();
+        this.overlayManager.updateResources(this.house.resources.food, this.house.resources.wood, this.house.resources.stone, this.house.actionPoints);
         this.lockControls();
     }
 
@@ -73,11 +74,11 @@ export class PlayerManager {
         this.locked = false;
     }
 
-    async handleMapClick(pointer) {
-
-        const worldPoint = pointer.positionToCamera(this.scene.cameras.main);
-        const clickedTile = await this.mapManager.getTileAt(worldPoint.x, worldPoint.y);
-    
+    async handleMapClick(pointer, clickedTile) {
+        // console.log('Param Tile:', tile);
+        // const worldPoint = pointer.positionToCamera(this.scene.cameras.main);
+        // const clickedTile = await this.mapManager.getTileAt(worldPoint.x, worldPoint.y);
+        // console.log('Clicked Tile:', clickedTile);
         if (!clickedTile) return;
     
         if (pointer.leftButtonDown()) {
@@ -86,6 +87,10 @@ export class PlayerManager {
             this.mapManager.showTileDetails(clickedTile);
         } else if (pointer.rightButtonDown()) {
             if (this.locked) return;
+            if (!this.selectedTile) {
+                this.overlayManager.displayMessage('Select a tile first');
+                return;
+            }
             let actionCost;
             if (this.ctrlKey.isDown) {
                 actionCost = await this.mapManager.calculateActionCost(this.house, this.selectedTile, clickedTile, 1, 'split');
@@ -97,7 +102,7 @@ export class PlayerManager {
             }
     
             if (!this.house.canPerformAction(actionCost)) {
-                console.log('Not enough action points');
+                this.overlayManager.displayMessage('Not enough action points');
                 return;
             }
     
@@ -113,8 +118,9 @@ export class PlayerManager {
             if (newTile) {
                 this.house.actionPoints -= actionCost;
                 this.selectedTile = newTile;
+                this.overlayManager.updateResources(this.house.food, this.house.wood, this.house.stone, this.house.actionPoints);
             } else {
-                console.log('Move failed');
+                this.overlayManager.displayMessage('Invalid move');
             }
         }
     }

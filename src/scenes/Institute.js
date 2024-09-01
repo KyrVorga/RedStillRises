@@ -8,21 +8,17 @@ import { PlayerManager } from '../institute/PlayerManager';
 import { AIManager } from '../institute/AIManager';
 import { TurnManager } from '../institute/TurnManager';
 import { House } from '../institute/House';
+import { Tile } from '../institute/Tile';
 
 export class Institute extends Scene {
     constructor() {
         super('Institute');
     }
 
-    init(data) {
-        this.house = data.house;
-        this.name = data.name;
+    init() {
         this.tileSize = 96;
         this.sideLength = 30;
         this.margin = 100;
-
-        this.mapGenerator = new MapGenerator(this.tileSize, this.sideLength);
-        this.mapData = this.mapGenerator.generateMapData();
     }
 
     preload() {
@@ -58,8 +54,11 @@ export class Institute extends Scene {
         
         this.load.svg('fog', 'assets/tiles/Fog.svg', { width: this.tileSize, height: this.tileSize });
 
-        this.load.svg('eye', 'assets/eye.svg', { width: 32, height: 32 });
-        this.load.svg('eye-off', 'assets/eye-off.svg', { width: 32, height: 32 });
+        this.load.svg('eye', 'assets/icons/eye.svg', { width: 32, height: 32 });
+        this.load.svg('eye-off', 'assets/icons/eye-off.svg', { width: 32, height: 32 });
+        this.load.svg('info', 'assets/icons/info.svg', { width: 32, height: 32 });
+        this.load.svg('help', 'assets/icons/help.svg', { width: 32, height: 32 });
+        this.load.svg('close', 'assets/icons/close.svg', { width: 32, height: 32 });
 
         this.load.svg('apollo_border', 'assets/tiles/ApolloBorder.svg', { width: this.tileSize, height: this.tileSize });
         this.load.svg('bacchus_border', 'assets/tiles/BacchusBorder.svg', { width: this.tileSize, height: this.tileSize });
@@ -218,19 +217,16 @@ export class Institute extends Scene {
         background.setDepth(-1); 
         background.setScale(0.75);
 
-        const houses = House.instantiateHouses();
-        this.playerHouse = houses.find((house) => house.name.toLowerCase() === this.house);
+        this.loadProgress();
 
         this.mapManager = new MapManager(this, this.mapData, this.tileSize, this.playerHouse);
-        await this.mapManager.revealHouseTiles(houses);
-
-        this.aiHouses = houses.filter((house) => house.name.toLowerCase() !== this.house);
+        await this.mapManager.revealHouseTiles(this.houses);
 
         this.playerManager = new PlayerManager(this, this.mapManager, this.playerHouse);
         this.mapManager.setPlayerManager(this.playerManager);
         
         this.aiManager = new AIManager(this, this.mapManager, this.aiHouses);
-        this.turnManager = new TurnManager(this, this.playerManager, this.aiManager, this.mapManager, this.playerHouse.name);
+        this.turnManager = new TurnManager(this, this.playerManager, this.aiManager, this.mapManager, this.playerHouse.name, this.turnOrder, this.turnIndex);
 
         this.playerManager.setTurnManager(this.turnManager);
         this.aiManager.setTurnManager(this.turnManager);
@@ -245,5 +241,56 @@ export class Institute extends Scene {
         // this.mapManager.revealAllTiles(this.playerHouse);
         await this.mapManager.renderMap(this.playerHouse);
         this.turnManager.startGame();
+    }
+
+    loadProgress() {
+        const gameState = localStorage.getItem('gameState');
+        this.name = localStorage.getItem('playerName');
+        this.house = localStorage.getItem('playerHouse');
+
+        if (gameState) {
+            const { mapData, houses, turnOrder, turnIndex } = JSON.parse(gameState);
+            this.mapData = mapData.map(tile => Tile.deserialize(tile));
+
+            this.houses = houses.map(house => {
+                let deserializedHouse = House.deserialize(house);
+                deserializedHouse.revealedTiles = house.revealedTiles.map(tile => Tile.deserialize(tile));
+                return deserializedHouse;
+            });
+            
+            this.turnOrder = turnOrder;
+            this.turnIndex = turnIndex;
+            
+            this.playerHouse = this.houses.find((house) => house.name.toLowerCase() === this.house);
+            this.aiHouses = this.houses.filter((house) => house.name.toLowerCase() !== this.house);
+        } else {
+            this.mapGenerator = new MapGenerator(this.tileSize, this.sideLength);
+            this.mapData = this.mapGenerator.generateMapData();
+            
+
+            this.houses = House.instantiateHouses();
+            this.playerHouse = this.houses.find((house) => house.name.toLowerCase() === this.house);
+            
+            this.aiHouses = this.houses.filter((house) => house.name.toLowerCase() !== this.house);
+        }
+    }
+
+    saveProgress() {
+        const gameState = {
+            mapData: this.mapManager.getMapData(),
+            houses: this.houses,
+            turnOrder: this.turnManager.getTurnOrder(),
+            turnIndex: this.turnManager.getCurrentTurnIndex(),
+        };
+        localStorage.setItem('gameState', JSON.stringify(gameState));
+    }
+
+  
+
+    displayMessage(message) {
+        this.playerManager.overlayManager.displayMessage(message);
+    }
+    updateTurnText(houseName) {
+        this.playerManager.overlayManager.updateTurnText(houseName);
     }
 }

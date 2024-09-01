@@ -1,6 +1,7 @@
 export class TurnManager {
-    constructor(scene, playerManager, aiManager, mapManager, playerHouse) {
+    constructor(scene, playerManager, aiManager, mapManager, playerHouse, turnOrder = null, turnIndex=0) {
         this.scene = scene;
+        console.log(turnOrder, turnIndex);
         
         this.playerManager = playerManager;
         this.aiManager = aiManager;
@@ -22,8 +23,13 @@ export class TurnManager {
             "Venus",
             "Vulcan",
         ]
-        this.turnOrder = this.shuffle(houses);
-        this.currentTurnIndex = 0;
+        if (turnOrder) {
+            this.turnOrder = turnOrder;
+        } else {
+            this.turnOrder = this.shuffle(houses);
+        }
+
+        this.currentTurnIndex = turnIndex;
     }
 
     shuffle(array) {
@@ -35,23 +41,30 @@ export class TurnManager {
     }
 
     async nextTurn() {
-        this.currentTurnIndex = (this.currentTurnIndex + 1) % this.turnOrder.length;
         const currentHouse = this.turnOrder[this.currentTurnIndex];
+        console.log('Current house:', currentHouse);
 
         if (currentHouse === this.playerHouse) {
-            console.log("Player's turn started");
+            this.scene.updateTurnText("Your turn");
             await this.playerManager.notifyTurn(currentHouse);
-            console.log("Player's turn ended");
         } else {
-            console.log(currentHouse + "'s turn started");
+            this.scene.updateTurnText(currentHouse + "'s turn");
             await this.aiManager.notifyTurn(currentHouse);
-            console.log(currentHouse + "'s turn ended");
         }
+        this.currentTurnIndex = (this.currentTurnIndex + 1) % this.turnOrder.length;
     }
 
     async startGame() {
         while (true) {
             await this.nextTurn();
         }
+    }
+
+    getTurnOrder() {
+        return this.turnOrder;
+    }
+
+    getCurrentTurnIndex() {
+        return this.currentTurnIndex;
     }
 }
