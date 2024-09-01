@@ -21,6 +21,7 @@ export class PlayerManager {
         this.overlayManager = new OverlayManager(this.scene, 40); // Adjust margin as needed
         this.overlay = this.overlayManager.createOverlay();
         this.overlayManager.createToggleViewButton(this.changeRenderMode.bind(this));
+        this.overlayManager.showHelpModal();
     }
 
     changeRenderMode(mode) {

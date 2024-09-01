@@ -14,6 +14,37 @@
 <body>
     <div id="app">
         <div id="game-container"></div>
+        
+        <div id="helpModal" class="modal">
+            <div class="modal-content">
+                <span class="close">&times;</span>
+                <h2>Tutorial</h2>
+                <p><strong>How the game works:</strong> Red Still Rises is a strategy game where you control a House and its units, aiming to dominate the map by capturing tiles and defeating opposing Houses. Your decisions on movement, resource gathering, and combat will determine your success.</p>
+
+                <p><strong>The goal:</strong> The objective is to either eliminate all other Houses or hold all their castles for 5 consecutive turns. Use strategy and tactical planning to outmaneuver your opponents and secure victory.</p>
+                
+                <p><strong>About tiles:</strong> Each tile on the map represents a specific biome, which affects the movement cost. When you move your units onto a tile, it becomes your territory, reducing the movement cost for your units on that tile. Controlling more territory gives you a strategic advantage.</p>
+                
+                <p><strong>How to move:</strong></p>
+                <ul>
+                    <li><strong>Select a tile:</strong> Left-click on a tile to select it.</li>
+                    <li><strong>Move units:</strong> Right-click on another tile to move your units there.</li>
+                    <li><strong>Control options:</strong>
+                        <ul>
+                            <li>Hold <strong>Ctrl</strong> while right-clicking to move one unit at a time. Multiple moves to the same tile are free.</li>
+                            <li>Hold <strong>Alt</strong> while right-clicking to split half your units onto the selected tile.</li>
+                        </ul>
+                    </li>
+                    <li><strong>Attacking:</strong> Move your units onto an enemy's tile to attack. The stronger force wins, but territory advantages can tip the scales.</li>
+                </ul>
+                
+                <p><strong>What the buttons do:</strong></p>
+                <ul>
+                    <li><strong>End Turn:</strong> Located in the top right, this button ends your turn, allowing the next House to take its actions.</li>
+                    <li><strong>Help Menu:</strong> Below the end turn button, this button reopens the help screen for guidance.</li>
+                </ul>
+            </div>
+        </div>
     </div>
     <script type="module" src="src/main.js"></script>
 </body>
