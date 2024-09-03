@@ -238,7 +238,7 @@ export class Institute extends Scene {
         this.cameraController.initializeCamera(x, y, 1);
         this.cameraController.enablePanning();
 
-        this.mapManager.revealAllTiles(this.playerHouse);
+        // this.mapManager.revealAllTiles(this.playerHouse);
         await this.mapManager.renderMap(this.playerHouse);
         this.turnManager.startGame();
     }
